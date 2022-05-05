@@ -1,0 +1,9 @@
+{
+  "name": "@cronqvist/vue-common",
+  "author": {
+    "email": "jim.cronqvist@gmail.com",
+    "name": "Jim Cronqvist"
+  },
+  "version": "1.0.0",
+  "description": "Vue Common - A collection of vuetify components, scripts, packages, etc. for Vue"
+}
