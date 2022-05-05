@@ -5,5 +5,8 @@
     "name": "Jim Cronqvist"
   },
   "version": "1.0.0",
-  "description": "Vue Common - A collection of vuetify components, scripts, packages, etc. for Vue"
+  "description": "Vue Common - A collection of vuetify components, scripts, packages, etc. for Vue",
+  "dependencies": {
+    "axios-auth-refresh": "3.0.0"
+  }
 }
