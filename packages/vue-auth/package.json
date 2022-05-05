@@ -1,0 +1,13 @@
+{
+    "name": "@package/vue-auth",
+    "author": {
+        "email": "jim.cronqvist@gmail.com",
+        "name": "Jim Cronqvist"
+    },
+    "version": "1.0.0",
+    "description": "Vue Auth - works great with laravel-api - https://github.com/JimCronqvist/laravel-api",
+    "main": "index.js",
+    "dependencies": {
+        "axios-auth-refresh": "3.0.0"
+    }
+}
