@@ -1,6 +1,7 @@
 #!/bin/env bash
 
 DIR="$(pwd)"
+MOUNT_CHECK="packages/vue-common"
 
 # If the script is ran from the context of being a node_modules dependency
 if [ "$(pwd | grep -c 'node_modules')" -gt 0 ]; then
@@ -17,7 +18,7 @@ fi
 #mkdir -p "packages/" && ln -rTs "node_modules/@cronqvist/vue-common" "packages/vue-common"
 
 # If there is no mount, copy the files
-if [ "$(mount | grep -c "/$PACKAGE_DIR")" -eq 0 ]; then
+if [ "$(mount | grep -c "/$MOUNT_CHECK")" -eq 0 ]; then
     mkdir -p "$PACKAGES_DIR/"
     rm -rf "$PACKAGE_DIR" && cp -r "$NODE_MODULES_PACKAGE_DIR" "$PACKAGES_DIR/"
     echo '*' > "$PACKAGE_DIR/.gitignore"
