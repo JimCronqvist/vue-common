@@ -13,7 +13,7 @@ export default async function ({ app, store }) {
   Vue.prototype.$http = axios;
 
   // Apply global error handler for axios
-  import('../../packages/error-handler/axios');
+  await import('../../packages/error-handler/axios');
   Vue.component('Snackbar', Snackbar);
   store.registerModule('snackbar', snackbarStore);
 
@@ -22,6 +22,5 @@ export default async function ({ app, store }) {
   setupAuth('/api/auth/refresh', '/auth/login');
 
   // Apply global loading handler for axios
-  import('../../packages/loading-handler/axios');
-
+  await import('../../packages/loading-handler/axios');
 }

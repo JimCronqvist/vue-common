@@ -13,7 +13,9 @@ export default async function boot(imports) {
     let triggered = false;
     for(const key of ['boot', 'default']) {
       if(script[key] instanceof Function) {
-        Object.assign(vueOptions, script[key]({ app, store, router }));
+        const option = await script[key]({ app, store, router });
+        //console.log(script, key, option);
+        Object.assign(vueOptions, option);
         triggered = true;
       }
     }
