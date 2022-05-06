@@ -4,6 +4,10 @@
     "email": "jim.cronqvist@gmail.com",
     "name": "Jim Cronqvist"
   },
+  "scripts": {
+    "postinstall": "bash copy.sh",
+    "copy-package": "bash copy.sh"
+  },
   "version": "1.0.0",
   "description": "Vue Common - A collection of vuetify components, scripts, packages, etc. for Vue",
   "dependencies": {
