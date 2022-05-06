@@ -25,6 +25,8 @@ export default async function boot(imports) {
 }
 
 export const bootList = () => [
-  //iamport('./i18n.js'),
-  //iamport('./vuetify2.js'),
+  //import('./http'),
+  //import('./i18n'),
+  //import('./dayjs'),
+  //import('./vuetify2'),
 ];
