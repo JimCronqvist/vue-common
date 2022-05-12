@@ -1,7 +1,6 @@
-import axios from 'axios'
 import store from '@/store/';
 
-function errorResponseHandler(error) {
+export function errorResponseHandler(error) {
     // Check for errorHandle config
     if(typeof error.config !== 'undefined' && Object.prototype.hasOwnProperty.call(error.config, 'errorHandle') && error.config.errorHandle === false) {
         return Promise.reject(error);
@@ -19,7 +18,7 @@ function errorResponseHandler(error) {
     return Promise.reject(error);
 }
 
-// Apply interceptor on response
-axios.interceptors.response.use(response => response, errorResponseHandler);
-
-export default errorResponseHandler;
+export default function setupAxiosErrorHandler(axios) {
+    // Apply interceptor on response
+    axios.interceptors.response.use(response => response, errorResponseHandler);
+}

@@ -27,8 +27,11 @@ export default async function boot(imports) {
 }
 
 export const bootList = () => [
-  //import('./http'),
-  //import('./i18n'),
-  //import('./dayjs'),
-  //import('./vuetify2'),
+  import('./axiosHttp'),
+  import('./axiosErrorHandler'),
+  import('./axiosLoadingHandler'),
+  import('./axiosAuth'),
+  import('./i18n'),
+  import('./dayjs'),
+  import('./vuetify2'),
 ];
