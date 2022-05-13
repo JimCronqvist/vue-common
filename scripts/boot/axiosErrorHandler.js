@@ -1,6 +1,6 @@
 import Snackbar from '../../packages/error-handler/Snackbar.vue';
 import snackbarStore from '../../packages/error-handler/store';
-import setupAxiosErrorHandler from "../../packages/error-handler";
+import setupAxiosErrorHandler from '../../packages/error-handler';
 import axios from 'axios';
 
 export default function ({ app, store }) {

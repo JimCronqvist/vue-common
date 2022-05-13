@@ -9,7 +9,7 @@ export default async function boot(imports) {
   }
   const vueOptions = {};
   for(const imp of imports) {
-    const script = await imp;
+    const script = imp instanceof Function ? { boot: await imp } : await imp;
     let triggered = false;
     for(const key of ['boot', 'default']) {
       if(script[key] instanceof Function) {
@@ -26,6 +26,8 @@ export default async function boot(imports) {
   return vueOptions;
 }
 
+// Code splitting is not possible to disable per dynamic import in vite/rollup.
+// Recommended to not use dynamic imports for now, and instead do normal static imports and pass in the function
 export const bootList = () => [
   import('./axiosHttp'),
   import('./axiosErrorHandler'),
