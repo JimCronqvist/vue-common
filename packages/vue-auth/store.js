@@ -67,8 +67,9 @@ const actions = {
       commit('setUser', null);
     }
   },
-  logout({ commit }, { logoutUrl }) {
-    if(logoutUrl && getCookie('accessToken')) {
+  logout({ commit, getters }, { logoutUrl }) {
+    const token = getters.getToken ?? getCookie('accessToken');
+    if(logoutUrl && getters.getToken) {
       return axios.post(logoutUrl).then(response => {
         commit('setData', null);
         commit('setUser', null);
@@ -106,6 +107,9 @@ const mutations = {
     state.user = payload;
     state.tenant = payload !== null ? payload?.customers[0]?.uuid : null;
     state.loggedIn = payload !== null;
+  },
+  setTenant(state, uuid) {
+    state.tenant = uuid;
   },
 };
 
