@@ -54,6 +54,7 @@ const actions = {
           message = 'Wrong username or password';
         }
         commit('setError', message);
+        throw new Error(message); // throw to break the promise chain
       })
       .finally(() => commit('setLoading', false));
   },
