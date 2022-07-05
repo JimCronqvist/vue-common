@@ -106,7 +106,7 @@ const mutations = {
   },
   setUser(state, payload) {
     state.user = payload;
-    state.tenant = payload !== null ? payload?.customers[0]?.uuid : null;
+    state.tenant = payload !== null ? payload?.customers?.[0]?.uuid : null;
     state.loggedIn = payload !== null;
   },
   setTenant(state, uuid) {
