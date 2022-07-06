@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 PACKAGE="vue-common"
 SCOPE="@cronqvist"
