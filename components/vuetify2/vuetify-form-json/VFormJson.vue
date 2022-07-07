@@ -165,8 +165,13 @@
 
 <script>
   // Inspired by: https://github.com/wotamann/vuetify-form-base
+  
+  import _get from 'lodash/get';
+  import _isPlainObject from 'lodash/isPlainObject';
+  import _isFunction from 'lodash/isFunction';
+  import _isString from 'lodash/isString';
+  import _isEmpty from 'lodash/isEmpty';
 
-  import { get, isPlainObject, isFunction, isString, isEmpty } from 'lodash'
   import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect } from 'vuetify/lib';
 
   const typeToComponent = {
@@ -232,7 +237,7 @@
       getColBind(obj) {
         const keysToColAttributes = (key, prefix) => {
           if(typeof key === 'undefined') return;
-          if(isPlainObject(key)) {
+          if(_isPlainObject(key)) {
             return Object.assign(...Object.entries(key).map(([k, v]) => ({[prefix+k]: v})));
           }
           return { [prefix === '' ? 'cols' : prefix.slice(0, -1)]: key};
@@ -264,16 +269,16 @@
       toCtrl (params) {
         // manipulate value going to control, toCtrl-function must return a (modified) value
         // schema:{ name: { type:'text', toCtrl: ( {value} ) value && value.toUpperCase, ... }, ... }
-        return isFunction(params.obj.schema.toCtrl) ? params.obj.schema.toCtrl(params) : params.value
+        return _isFunction(params.obj.schema.toCtrl) ? params.obj.schema.toCtrl(params) : params.value
       },
       fromCtrl (params) {
         // manipulate updated value from control, fromCtrl-function must return a (modified) value
         // schema:{ name: { type:'text', fromCtrl: ( {value} ) value && value.toUpperCase, ... }, ... }
-        return isFunction(params.obj.schema.fromCtrl) ? params.obj.schema.fromCtrl(params) : params.value
+        return _isFunction(params.obj.schema.fromCtrl) ? params.obj.schema.fromCtrl(params) : params.value
       },
       // Radio options, sanitize item from array schema.options, ensure that the values are objects
       sanitizeRadioOption (v) {
-        return isString(v) ? { value: v, label: v } : v;
+        return _isString(v) ? { value: v, label: v } : v;
       },
       setValue (obj) {
         // Control gets a Value
@@ -322,8 +327,8 @@
       },
       updateArrayFromState (schema, data) {
         this.flatCombinedArray.forEach(obj => {
-          obj.schema = get(schema, obj.key, null); // get - lodash
-          obj.value = get(data, obj.key, null); // get - lodash
+          obj.schema = _get(schema, obj.key, null); // get - lodash
+          obj.value = _get(data, obj.key, null); // get - lodash
         });
       },
       // Flatten the schema
@@ -332,13 +337,13 @@
         const schema = {};
         Object.keys(sch).forEach(i => {
           // If the 'type' property was found and is a string, we have an actual input field here, no nesting here.
-          if (isString(sch[i].type)) {
+          if (_isString(sch[i].type)) {
             console.debug(`Schema '${i}' input found`);
             data[i] = dat[i];
             schema[i] = sch[i];
           }
           // Check if the item is an object (nested) OR an array (nested)
-          else if ((isPlainObject(sch[i]) && !isEmpty(sch[i])) || Array.isArray(sch[i])) {
+          else if ((_isPlainObject(sch[i]) && !_isEmpty(sch[i])) || Array.isArray(sch[i])) {
             console.debug(`Schema '${i}' nested input found`);
             let { data: flatData, schema: flatSchema } = this.flattenSchemaWithData(sch[i], dat[i] || {});
             Object.keys(flatData).forEach(ii => {
@@ -352,7 +357,7 @@
       combineObjectsToArray ({ schema, data }) {
         const arr = [];
         Object.keys(data).forEach(key => {
-          if (!isPlainObject(schema[key])) {
+          if (!_isPlainObject(schema[key])) {
             console.warn(`Prop '${key}' must have a correspondingly Property in Schema with at least ${key}:{ type:'text'} as value. Prop '${key}' is not editable and keeps untouched!`);
             return;
           }
