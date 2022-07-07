@@ -17,10 +17,12 @@ export default function(refreshUrl, loginFormUrl) {
     pauseInstanceWhileRefreshing: true,
   });
 
-  // Use interceptor to inject the Bearer Token from the store to the requests
+  // Use interceptor to inject the Bearer Token from the store to the requests when one exists
   axios.interceptors.request.use(request => {
     const accessToken = store.getters['auth/getToken'];
-    request.headers['Authorization'] = `Bearer ${accessToken}`;
+    if(accessToken !== null) {
+      request.headers['Authorization'] = `Bearer ${accessToken}`;
+    }
     return request;
   });
 
