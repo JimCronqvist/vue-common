@@ -9,7 +9,11 @@ export default function(refreshUrl, loginFormUrl) {
   const refreshAuthLogic = failedRequest => axios.post(refreshUrl).then(response => {
     return store.dispatch('auth/setData', response.data).then(() => Promise.resolve());
   }).catch(error => {
-    router.push(loginFormUrl);
+    if(loginFormUrl instanceof Function) {
+      loginFormUrl({ router, store });
+    } else {
+      router.push(loginFormUrl);
+    }
   });
 
   // Instantiate the interceptor (you can chain it as it returns the axios instance)
