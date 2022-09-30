@@ -143,7 +143,7 @@
                 @input="onInput($event, obj)"
                 :error-messages="errors"
                 :menu-props="{ offsetY: true }"
-              ></div>
+              >{{ typeof obj.schema['v-text'] !== 'undefined' ? obj.schema['v-text'] : '' }}</div>
 
             </ValidationProvider>
 
@@ -225,7 +225,7 @@
     },
     methods: {
       mapTypeToComponent (type) {
-        return typeToComponent[type] ? typeToComponent[type] : `v-${type}`
+        return typeToComponent[type] ? typeToComponent[type] : `${type}`
       },
       getType(obj) {
         return obj.schema.type;
