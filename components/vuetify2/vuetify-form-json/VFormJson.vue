@@ -192,7 +192,8 @@
     color: 'v-color-picker',
     date: 'v-date-picker',
     time: 'v-time-picker',
-    textarea: 'v-textarea'
+    textarea: 'v-textarea',
+    select: 'v-select',
   };
 
   export default {
