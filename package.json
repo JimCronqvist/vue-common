@@ -13,6 +13,7 @@
   "dependencies": {
     "axios-auth-refresh": "^3.1.0",
     "vue-api-query": "^1.9.1",
-    "@babel/runtime": "^7.17.9"
+    "@babel/runtime": "^7.17.9",
+    "dayjs": "^1.11.7"
   }
 }

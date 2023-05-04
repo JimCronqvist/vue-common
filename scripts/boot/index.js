@@ -36,4 +36,5 @@ export const bootList = () => [
   //import('./i18n'),
   //import('./dayjs'),
   //import('./vuetify2'),
+  //import('./filters'),
 ];
