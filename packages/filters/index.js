@@ -2,6 +2,7 @@ import bytes from './bytes';
 import capitalize from './capitalize';
 import currency from './currency';
 import date from './date';
+import dateDayMonth from './dateDayMonth';
 import dateShort from './dateShort';
 import dateShortMonth from './dateShortMonth';
 import dateShortDay from './dateShortDay';
@@ -24,6 +25,7 @@ export {
   capitalize,
   currency,
   date,
+  dateDayMonth,
   dateShort,
   dateShortMonth,
   dateShortDay,
