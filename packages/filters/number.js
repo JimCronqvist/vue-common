@@ -1,3 +1,5 @@
-export default function(number, locale) {
-  return number.toLocaleString(locale);
+import getLocale from './utils/locale';
+
+export default function(number) {
+  return number.toLocaleString(getLocale());
 };

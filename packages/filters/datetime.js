@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
+import getLocale from './utils/locale';
 
 export default function(timestamp) {
-  return dayjs(timestamp).toDate().toLocaleDateString(dayjs.locale(), {
+  return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: 'short',
     timeStyle: 'medium',
-    //timeZone: '...',
-  });
+  }).format(dayjs(timestamp).toDate());
 };

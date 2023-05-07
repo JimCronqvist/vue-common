@@ -4,6 +4,6 @@ import getLocale from './utils/locale';
 export default function(timestamp) {
   return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: 'short',
-    timeStyle: 'short',
+    timeStyle: 'long',
   }).format(dayjs(timestamp).toDate());
 };

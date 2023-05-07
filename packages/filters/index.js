@@ -3,8 +3,10 @@ import capitalize from './capitalize';
 import currency from './currency';
 import date from './date';
 import dateShort from './dateShort';
+import dateShortMonth from './dateShortMonth';
+import dateShortDay from './dateShortDay';
 import datetime from './datetime';
-import datetimeLong from './datetimeLong';
+import datetimeTz from './datetimeTz';
 import datetimeShort from './datetimeShort';
 import formatDate from './formatDate';
 import lowercase from './lowercase';
@@ -23,8 +25,10 @@ export {
   currency,
   date,
   dateShort,
+  dateShortMonth,
+  dateShortDay,
   datetime,
-  datetimeLong,
+  datetimeTz,
   datetimeShort,
   formatDate,
   lowercase,

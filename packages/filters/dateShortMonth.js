@@ -4,6 +4,6 @@ import getLocale from './utils/locale';
 export default function(timestamp) {
   return dayjs(timestamp).toDate().toLocaleDateString(getLocale(), {
     day: 'numeric',
-    month: 'numeric',
+    month: 'short',
   });
 };
