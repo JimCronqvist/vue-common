@@ -43,8 +43,12 @@ export async function setI18nLanguage(lang) {
   if(!languages.includes(lang)) return Promise.reject('setI18nLanguage: i18n language does not exist');
 
   return loadLocaleMessages()[lang]().then(messages => {
-    i18n.mergeLocaleMessage(lang, messages.default);
-    i18n.locale = lang;
+    i18n.global.mergeLocaleMessage(lang, messages.default);
+    if (i18n.mode === 'legacy') {
+      i18n.global.locale = lang;
+    } else {
+      i18n.global.locale.value = lang;
+    }
     axios.defaults.headers.common['Accept-Language'] = lang;
     document.querySelector('html').setAttribute('lang', lang);
   });
