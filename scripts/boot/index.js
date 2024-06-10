@@ -1,8 +1,7 @@
-import app from 'vue';
 import store from '@/store';
 import router from '@/router';
 
-export default async function boot(imports) {
+export default async function boot(app, imports) {
   if(!Array.isArray(imports)) {
     console.warn('Boot scripts needs to be provided as an array of imports');
     return null;

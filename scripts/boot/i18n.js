@@ -1,8 +1,5 @@
-import Vue from 'vue';
-import VueI18n from 'vue-i18n';
+import { createI18n } from 'vue-i18n';
 import axios from 'axios';
-
-Vue.use(VueI18n);
 
 function loadLocaleMessages() {
   //console.log('start load locale message');
@@ -57,11 +54,12 @@ export const languages = Object.getOwnPropertyNames(loadLocaleMessages());
 export const selectedLocale = storeLocale => checkDefaultLanguage(storeLocale) || import.meta.env.VITE_I18N_LOCALE || 'en-US';
 export const selectedLanguage = selectedLocale => selectedLocale.split('-')[0];
 
-const i18n = new VueI18n({
+const i18n = createI18n({
   fallbackLocale: import.meta.env.VITE_I18N_LOCALE || 'en-US',
 });
 
 export async function boot({ app, store }) {
+  app.use(i18n);
 
   const locale = selectedLocale(store.state.locale);
   //const language = selectedLanguage(locale);
@@ -69,7 +67,7 @@ export async function boot({ app, store }) {
   // Load the default language
   await setI18nLanguage(locale);
 
-  return {i18n};
+  return { i18n };
 }
 
 export default i18n;

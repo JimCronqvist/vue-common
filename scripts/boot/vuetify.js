@@ -1,11 +1,17 @@
+// Styles
 import '@mdi/font/css/materialdesignicons.css';
-import Vuetify from 'vuetify/lib/framework';
+import 'vuetify/styles';
 
-const vuetify = new Vuetify({
+// Composables
+import { createVuetify } from 'vuetify';
+
+
+const vuetify = createVuetify({
   icons: {
     iconfont: 'mdi',
   },
   theme: {
+    defaultTheme: 'dark',
     options: {
       customProperties: true,
     },
@@ -22,7 +28,7 @@ const vuetify = new Vuetify({
 });
 
 export function boot({ app }) {
-  app.use(Vuetify);
+  app.use(vuetify);
   return { vuetify };
 }
 

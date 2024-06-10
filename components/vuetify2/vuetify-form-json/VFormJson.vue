@@ -1,11 +1,10 @@
 <template>
   <v-row>
-    <template v-for="(obj, index) in flatCombinedArray">
+    <template v-for="(obj, index) in flatCombinedArray" :key="index">
       <v-col
         v-show="!obj.schema.hidden"
         v-bind="getColBind(obj)"
         :class="getClassName(obj)"
-        :key="index"
       >
 
         <!-- slot on top of item  -> <v-btn slot="top-slot-[key]> -->
@@ -157,7 +156,7 @@
       </v-col>
 
       <!-- push next item to the right and fill space between items -->
-      <v-spacer v-if="obj.schema.spacer" :key="`s-${index}`"></v-spacer>
+      <v-spacer v-if="obj.schema.spacer"></v-spacer>
 
     </template>
   </v-row>
@@ -165,14 +164,14 @@
 
 <script>
   // Inspired by: https://github.com/wotamann/vuetify-form-base
-  
+
   import _get from 'lodash/get';
   import _isPlainObject from 'lodash/isPlainObject';
   import _isFunction from 'lodash/isFunction';
   import _isString from 'lodash/isString';
   import _isEmpty from 'lodash/isEmpty';
 
-  import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect } from 'vuetify/lib';
+  //import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect } from 'vuetify/components';
 
   const typeToComponent = {
     // Use native HTML5 Input Types - https://www.wufoo.com/html5/
@@ -198,7 +197,7 @@
 
   export default {
     name: 'v-form-json',
-    components: { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect },
+    //components: { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect },
     props: {
       value: {
         type: Object,
