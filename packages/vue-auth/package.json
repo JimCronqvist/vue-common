@@ -8,6 +8,6 @@
     "description": "Vue Auth - works great with laravel-api - https://github.com/JimCronqvist/laravel-api",
     "main": "index.js",
     "dependencies": {
-        "axios-auth-refresh": "3.0.0"
+        "axios-auth-refresh": "^3.3.6"
     }
 }
