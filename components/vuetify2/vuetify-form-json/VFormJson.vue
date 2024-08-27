@@ -14,135 +14,121 @@
         <slot :name="`slot-item-type-${getType(obj)}`">
           <!-- slot replaces complete item of defined key -> <div slot="item-slot-[key]>-->
           <slot :name="`slot-item-key-${getKeyAsClass(obj)}`">
-            <!-- VeeValidate -->
-            <ValidationProvider
-              :name="` `"
-              :vid="obj.key"
-              :rules="obj.schema.rules"
-              v-slot="{ errors }"
+            <!-- radio -->
+            <v-radio-group
+              v-if="obj.schema.type === 'radio'"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              :model-value="setValue(obj)"
+              @update:model-value="onInput($event, obj)"
             >
-              <!-- radio -->
-              <v-radio-group
-                v-if="obj.schema.type === 'radio'"
-                v-bind="{...obj.schema, rules: []}"
-                :value="setValue(obj)"
-                @change="onInput($event, obj)"
-                :error-messages="errors"
-              >
-                <v-radio
-                  v-for="(o,ix) in obj.schema.options"
-                  v-bind="{...obj.schema, rules: []}"
-                  :key="ix"
-                  :label="sanitizeRadioOption(o).label"
-                  :value="sanitizeRadioOption(o).value"
-                />
-              </v-radio-group>
-
-              <!-- checkbox || switch -->
-              <component
-                v-else-if="obj.schema.type === 'switch' || obj.schema.type === 'checkbox'"
-                :is="mapTypeToComponent(obj.schema.type)"
-                :input-value="setValue(obj)"
-                v-bind="{...obj.schema, rules: []}"
-                @change="onInput($event, obj)"
-                :error-messages="errors"
+              <v-radio
+                v-for="(o,ix) in obj.schema.options"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                :key="ix"
+                :label="sanitizeRadioOption(o).label"
+                :model-value="sanitizeRadioOption(o).value"
               />
+            </v-radio-group>
 
-              <!-- file -->
-              <v-file-input
-                v-else-if="obj.schema.type === 'file'"
-                :value="setValue(obj)"
-                v-bind="{...obj.schema, rules: []}"
-                @change="onInput($event, obj)"
-                :error-messages="errors"
-              />
+            <!-- checkbox || switch -->
+            <component
+              v-else-if="obj.schema.type === 'switch' || obj.schema.type === 'checkbox'"
+              :is="mapTypeToComponent(obj.schema.type)"
+              :input-value="setValue(obj)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              @change="onInput($event, obj)"
+            />
 
-              <!-- date || time -->
-              <v-menu
-                v-else-if="obj.schema.type === 'date' || obj.schema.type === 'time'"
-                :close-on-content-click="obj.schema.type === 'date'"
-                :nudge-right="33"
-                :nudge-bottom="-10"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template #activator="{ on }">
-                  <v-text-field
-                    v-on="on"
-                    :prepend-icon="obj.schema.type === 'date' ? 'mdi-calendar-month-outline' : 'mdi-clock-outline'"
-                    clearable
-                    readonly
-                    v-bind="{...obj.schema, rules: []}"
-                    :value="setValue(obj)"
-                    @input="onInput($event, obj)"
-                    :error-messages="errors"
-                    type="text"
-                  />
-                </template>
-                <component
-                  :is="mapTypeToComponent(obj.schema.type)"
-                  @input="onInput($event, obj)"
-                  v-bind="{...obj.schema, rules: []}"
-                  :value="setValue(obj)"
+            <!-- file -->
+            <v-file-input
+              v-else-if="obj.schema.type === 'file'"
+              :model-value="setValue(obj)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              @change="onInput($event, obj)"
+            />
+
+            <!-- date || time -->
+            <v-menu
+              v-else-if="obj.schema.type === 'date' || obj.schema.type === 'time'"
+              :close-on-content-click="obj.schema.type === 'date'"
+              :nudge-right="33"
+              :nudge-bottom="-10"
+              transition="scale-transition"
+              offset-y
+              min-width="290px"
+            >
+              <template #activator="{ on }">
+                <v-text-field
+                  v-on="on"
+                  :prepend-icon="obj.schema.type === 'date' ? 'mdi-calendar-month-outline' : 'mdi-clock-outline'"
+                  clearable
+                  readonly
+                  v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                  :model-value="setValue(obj)"
+                  @update:model-value="onInput($event, obj)"
+                  type="text"
                 />
-              </v-menu>
-
-              <!-- color -->
-              <v-menu
-                v-else-if="obj.schema.type === 'color'"
-                :close-on-content-click="false"
-                :nudge-right="33"
-                :nudge-bottom="-10"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template #activator="{ on }">
-                  <v-text-field
-                    v-on="on"
-                    prepend-icon="mdi-format-color-fill"
-                    clearable
-                    readonly
-                    v-bind="{...obj.schema, rules: []}"
-                    :value="obj.value"
-                    @input="onInput($event, obj)"
-                    :error-messages="errors"
-                    type="text"
-                  >
-                    <template #prepend v-if="obj.value">
-                      <v-sheet
-                        style="margin: 0 3px"
-                        height="20"
-                        width="18"
-                        :color="obj.value || 'transparent'"
-                      />
-                    </template>
-                  </v-text-field>
-                </template>
-                <v-color-picker
-                  mode="hexa"
-                  hide-mode-switch
-                  @update:color="onColor($event, obj)"
-                  v-bind="{...obj.schema, rules: []}"
-                  :value="setValue(obj) || '#000000'"
-                />
-              </v-menu>
-
-              <!-- All other Types -->
+              </template>
               <component
-                v-else
                 :is="mapTypeToComponent(obj.schema.type)"
-                v-bind="{...obj.schema, rules: []}"
-                v-on="getInputOn(obj.schema)"
-                :value="setValue(obj)"
-                @input="onInput($event, obj)"
-                :error-messages="errors"
-                :menu-props="{ offsetY: true }"
-              >
-                {{ typeof obj.schema['v-text'] !== 'undefined' ? obj.schema['v-text'] : '' }}
-              </component>
-            </ValidationProvider>
+                @update:model-value="onInput($event, obj)"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                :model-value="setValue(obj)"
+              />
+            </v-menu>
+
+            <!-- color -->
+            <v-menu
+              v-else-if="obj.schema.type === 'color'"
+              :close-on-content-click="false"
+              :nudge-right="33"
+              :nudge-bottom="-10"
+              transition="scale-transition"
+              offset-y
+              min-width="290px"
+            >
+              <template #activator="{ on }">
+                <v-text-field
+                  v-on="on"
+                  prepend-icon="mdi-format-color-fill"
+                  clearable
+                  readonly
+                  v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                  :model-value="obj.value"
+                  @update:model-value="onInput($event, obj)"
+                  type="text"
+                >
+                  <template #prepend v-if="obj.value">
+                    <v-sheet
+                      style="margin: 0 3px"
+                      height="20"
+                      width="18"
+                      :color="obj.value || 'transparent'"
+                    />
+                  </template>
+                </v-text-field>
+              </template>
+              <v-color-picker
+                mode="hexa"
+                hide-mode-switch
+                @update:model-value="onColor($event, obj)"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                :model-value="setValue(obj) || '#000000'"
+              />
+            </v-menu>
+
+            <!-- All other Types -->
+            <component
+              v-else
+              :is="mapTypeToComponent(obj.schema.type)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema)}"
+              v-on="getInputOn(obj.schema)"
+              :model-value="setValue(obj)"
+              @update:model-value="onInput($event, obj)"
+              :menu-props="{ offsetY: true }"
+            >
+              {{ typeof obj.schema['v-text'] !== 'undefined' ? obj.schema['v-text'] : '' }}
+            </component>
           </slot>
         </slot>
 
@@ -166,7 +152,51 @@ import _isFunction from 'lodash/isFunction';
 import _isString from 'lodash/isString';
 import _isEmpty from 'lodash/isEmpty';
 
-//import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect } from 'vuetify/components';
+import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTextarea, VSelect } from 'vuetify/components';
+import { VTimePicker } from 'vuetify/labs/components';
+
+import { validate as veeValidate, normalizeRules } from 'vee-validate';
+
+export const validate = async ($event, onSuccessCallback) => {
+  if($event.defaultPrevented === false) {
+    $event.preventDefault();
+  }
+  const { valid, errors } = await $event; // Vuetify form SubmitEventPromise event
+  if(valid) {
+    onSuccessCallback();
+  } else {
+    const e = new Error('Form validation failed');
+    e.errors = errors;
+    console.warn(e);
+  }
+};
+
+export function rulesToVuetify(rules, objSchema) {
+  if(typeof rules === 'undefined') return [];
+  if(typeof rules !== 'string' && !Array.isArray(rules) && typeof rules !== 'function') return rules;
+
+  rules = Array.isArray(rules) ? rules : [rules];
+
+  const vuetifyRules = rules.map(rule => {
+    if (typeof rule === 'string') {
+      //rule = normalizeRules(rule); // Done by vee-validate for now
+      return value => {
+        const passes = veeValidate(value, rule, {
+          name: objSchema.name,
+          label: objSchema.label,
+        });
+        return passes.then(value => {
+          //console.log('Passes:', value);
+          if(value.valid === true) return true;
+          return value.errors[0];
+        });
+      }
+    }
+    return rule;
+  });
+  //console.log('rulesToVuetify', rules, vuetifyRules, objSchema);
+  return vuetifyRules;
+}
 
 const typeToComponent = {
   // Use native HTML5 Input Types - https://www.wufoo.com/html5/
@@ -192,7 +222,7 @@ const typeToComponent = {
 
 export default {
   name: 'VFormJson',
-  //components: { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect },
+  components: { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect },
   props: {
     value: {
       type: Object,
@@ -203,7 +233,7 @@ export default {
       required: true
     }
   },
-  emits: ['change', 'update'],
+  emits: ['change', 'update', 'update:modelValue'],
   data() {
     return {
       flatCombinedArray: [],
@@ -223,6 +253,7 @@ export default {
     this.flatCombinedArray = this.flattenAndCombineToArray(this.value, this.schema);
   },
   methods: {
+    rulesToVuetify,
     mapTypeToComponent(type) {
       return typeToComponent[type] ? typeToComponent[type] : `${type}`
     },
@@ -300,7 +331,7 @@ export default {
       this.updateArrayFromState(this.schema, this.value);
 
       // emit events
-      this.emitValue('input', value);
+      this.emitValue('update:modelValue', value);
     },
     // Event base
     emitValue(emit, val) {
@@ -317,9 +348,11 @@ export default {
       pathArray.forEach((p, ix) => {
         schema = schema[p];
         if (ix === pathArray.length - 1) {
-          this.$set(object, p, value);
+          object[p] = value; // Vue 3
+          //this.$set(object, p, value); // Vue 2
         } else if (typeof object[p] === 'undefined') {
-          this.$set(object, p, Array.isArray(schema) ? [] : {});
+          object[p] = Array.isArray(schema) ? [] : {}; // Vue 3
+          //this.$set(object, p, Array.isArray(schema) ? [] : {}); // Vue 2
         }
         object = object[p];
       });
