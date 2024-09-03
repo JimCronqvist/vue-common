@@ -32,11 +32,13 @@
 
             <!-- checkbox || switch -->
             <component
+              :true-value="1"
+              :false-value="0"
               v-else-if="obj.schema.type === 'switch' || obj.schema.type === 'checkbox'"
               :is="mapTypeToComponent(obj.schema.type)"
-              :input-value="setValue(obj)"
+              :model-value="setValue(obj)"
               v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
-              @change="onInput($event, obj)"
+              @update:model-value="onInput($event, obj)"
             />
 
             <!-- file -->
@@ -47,23 +49,31 @@
               @change="onInput($event, obj)"
             />
 
-            <!-- date || time -->
+            <!-- date -->
+            <v-date-input
+              prepend-icon=""
+              prepend-inner-icon="$calendar"
+              clearable
+              v-else-if="obj.schema.type === 'date'"
+              :model-value="setValue(obj)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              @update:model-value="onDate($event, obj)"
+              type="text"
+            />
+
+            <!-- time -->
             <v-menu
-              v-else-if="obj.schema.type === 'date' || obj.schema.type === 'time'"
+              v-else-if="obj.schema.type === 'time'"
               :close-on-content-click="obj.schema.type === 'date'"
-              :nudge-right="33"
-              :nudge-bottom="-10"
               transition="scale-transition"
-              offset-y
               min-width="290px"
             >
-              <template #activator="{ on }">
+              <template #activator="{ props }">
                 <v-text-field
-                  v-on="on"
-                  :prepend-icon="obj.schema.type === 'date' ? 'mdi-calendar-month-outline' : 'mdi-clock-outline'"
+                  prepend-inner-icon="mdi-clock-outline"
                   clearable
                   readonly
-                  v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
                   :model-value="setValue(obj)"
                   @update:model-value="onInput($event, obj)"
                   type="text"
@@ -73,7 +83,6 @@
                 :is="mapTypeToComponent(obj.schema.type)"
                 @update:model-value="onInput($event, obj)"
                 v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
-                :model-value="setValue(obj)"
               />
             </v-menu>
 
@@ -81,36 +90,35 @@
             <v-menu
               v-else-if="obj.schema.type === 'color'"
               :close-on-content-click="false"
-              :nudge-right="33"
-              :nudge-bottom="-10"
               transition="scale-transition"
-              offset-y
               min-width="290px"
             >
-              <template #activator="{ on }">
+              <template #activator="{ props }">
                 <v-text-field
-                  v-on="on"
-                  prepend-icon="mdi-format-color-fill"
                   clearable
                   readonly
-                  v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
                   :model-value="obj.value"
                   @update:model-value="onInput($event, obj)"
                   type="text"
                 >
-                  <template #prepend v-if="obj.value">
+                  <template #prepend-inner>
                     <v-sheet
+                      v-if="obj.value"
                       style="margin: 0 3px"
                       height="20"
                       width="18"
                       :color="obj.value || 'transparent'"
                     />
+                    <v-icon v-else>
+                      mdi-format-color-fill
+                    </v-icon>
                   </template>
                 </v-text-field>
               </template>
               <v-color-picker
-                mode="hexa"
-                hide-mode-switch
+                mode="hex"
+                :modes="['hex', 'rgb']"
                 @update:model-value="onColor($event, obj)"
                 v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
                 :model-value="setValue(obj) || '#000000'"
@@ -152,12 +160,17 @@ import _isFunction from 'lodash/isFunction';
 import _isString from 'lodash/isString';
 import _isEmpty from 'lodash/isEmpty';
 
-import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTextarea, VSelect } from 'vuetify/components';
-import { VTimePicker } from 'vuetify/labs/components';
+import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VTextarea, VSelect } from 'vuetify/components';
+import { VTimePicker, VDateInput } from 'vuetify/labs/components';
 
 import { validate as veeValidate, normalizeRules } from 'vee-validate';
 
+//import { useDate } from 'vuetify';
+
 export const validate = async ($event, onSuccessCallback) => {
+  if(!($event instanceof SubmitEvent)) {
+    throw new Error('Validation failed due to the passed $event is not a SubmitEvent event, the correct usage is: @submit="validate($event, onSuccessCallback)"');
+  }
   if($event.defaultPrevented === false) {
     $event.preventDefault();
   }
@@ -167,7 +180,7 @@ export const validate = async ($event, onSuccessCallback) => {
   } else {
     const e = new Error('Form validation failed');
     e.errors = errors;
-    console.warn(e);
+    console.warn(e, errors);
   }
 };
 
@@ -214,7 +227,7 @@ const typeToComponent = {
   switch: 'v-switch',
   checkbox: 'v-checkbox',
   color: 'v-color-picker',
-  date: 'v-date-picker',
+  date: 'v-date-input',
   time: 'v-time-picker',
   textarea: 'v-textarea',
   select: 'v-select',
@@ -222,7 +235,13 @@ const typeToComponent = {
 
 export default {
   name: 'VFormJson',
-  components: { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDatePicker, VTimePicker, VTextarea, VSelect },
+  /*
+  setup() {
+    const date = useDate();
+    return { date };
+  },
+  */
+  components: { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDateInput, VTimePicker, VTextarea, VSelect },
   props: {
     value: {
       type: Object,
@@ -237,6 +256,7 @@ export default {
   data() {
     return {
       flatCombinedArray: [],
+      isMenuOpen: false,
     }
   },
   computed: {
@@ -312,14 +332,31 @@ export default {
     },
     setValue(obj) {
       // Control gets a Value
-      return this.toCtrl({value: obj.value, obj, data: this.storeStateData, schema: this.storeStateSchema})
+      let value = this.toCtrl({value: obj.value, obj, data: this.storeStateData, schema: this.storeStateSchema})
+
+      // Special handling for some Vuetify components
+      if(this.mapTypeToComponent(obj.schema.type) === 'v-date-input') {
+        // v-date-input does not accept null, only undefined
+        if(value === null) {
+          value = undefined;
+        } else if(_isString(value)) {
+          value = this.$vuetify.date.parseISO(value);
+        }
+      }
+
+      return value;
     },
     onColor(value, obj) {
-      this.onInput(value.hex || false, obj);
+      this.onInput(value, obj);
+    },
+    onDate(value, obj) {
+      if(value !== null) {
+        value = this.$vuetify.date.toISO(value);
+      }
+      this.onInput(value, obj);
     },
     // Get Value from Input & other Events
     onInput(value, obj) {
-
       // Value after change in Control
       value = this.fromCtrl({value, obj, data: this.storeStateData, schema: this.storeStateSchema});
 

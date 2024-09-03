@@ -1,4 +1,4 @@
-import { createI18n } from 'vue-i18n';
+import { createI18n, useI18n } from 'vue-i18n';
 import axios from 'axios';
 
 function loadLocaleMessages() {
@@ -59,6 +59,7 @@ export const selectedLocale = storeLocale => checkDefaultLanguage(storeLocale) |
 export const selectedLanguage = selectedLocale => selectedLocale.split('-')[0];
 
 const i18n = createI18n({
+  legacy: false, // Vuetify does not support the legacy mode of vue-i18n
   fallbackLocale: import.meta.env.VITE_I18N_LOCALE || 'en-US',
 });
 
@@ -73,5 +74,7 @@ export async function boot({ app, store }) {
 
   return { i18n };
 }
+
+export { useI18n };
 
 export default i18n;
