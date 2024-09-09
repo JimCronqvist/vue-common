@@ -17,13 +17,13 @@
             <!-- radio -->
             <v-radio-group
               v-if="obj.schema.type === 'radio'"
-              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
               :model-value="setValue(obj)"
               @update:model-value="onInput($event, obj)"
             >
               <v-radio
                 v-for="(o,ix) in obj.schema.options"
-                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
                 :key="ix"
                 :label="sanitizeRadioOption(o).label"
                 :model-value="sanitizeRadioOption(o).value"
@@ -37,7 +37,7 @@
               v-else-if="obj.schema.type === 'switch' || obj.schema.type === 'checkbox'"
               :is="mapTypeToComponent(obj.schema.type)"
               :model-value="setValue(obj)"
-              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
               @update:model-value="onInput($event, obj)"
             />
 
@@ -45,7 +45,7 @@
             <v-file-input
               v-else-if="obj.schema.type === 'file'"
               :model-value="setValue(obj)"
-              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
               @change="onInput($event, obj)"
             />
 
@@ -56,7 +56,7 @@
               clearable
               v-else-if="obj.schema.type === 'date'"
               :model-value="setValue(obj)"
-              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
               @update:model-value="onDate($event, obj)"
               type="text"
             />
@@ -74,7 +74,7 @@
                   prepend-inner-icon="mdi-clock-outline"
                   clearable
                   readonly
-                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
                   :model-value="setValue(obj)"
                   @update:model-value="onInput($event, obj)"
                   type="text"
@@ -83,7 +83,7 @@
               <component
                 :is="mapTypeToComponent(obj.schema.type)"
                 @update:model-value="onInput($event, obj)"
-                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
               />
             </v-menu>
 
@@ -99,7 +99,7 @@
                 <v-text-field
                   clearable
                   readonly
-                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
                   :model-value="obj.value"
                   @update:model-value="onInput($event, obj)"
                   type="text"
@@ -122,7 +122,7 @@
                 mode="hex"
                 :modes="['hex', 'rgb']"
                 @update:model-value="onColor($event, obj)"
-                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules)}"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
                 :model-value="setValue(obj) || '#000000'"
               />
             </v-menu>
@@ -131,7 +131,7 @@
             <component
               v-else
               :is="mapTypeToComponent(obj.schema.type)"
-              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema)}"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
               v-on="getInputOn(obj.schema)"
               :model-value="setValue(obj)"
               @update:model-value="onInput($event, obj)"
@@ -186,7 +186,7 @@ export const validate = async ($event, onSuccessCallback) => {
   }
 };
 
-export function rulesToVuetify(rules, objSchema) {
+export function rulesToVuetify(rules, objSchema, formData) {
   if(typeof rules === 'undefined') return [];
   if(typeof rules !== 'string' && !Array.isArray(rules) && typeof rules !== 'function') return rules;
 
@@ -199,6 +199,7 @@ export function rulesToVuetify(rules, objSchema) {
         const passes = veeValidate(value, rule, {
           name: objSchema.name,
           label: objSchema.label,
+          values: formData,
         });
         return passes.then(value => {
           //console.log('Passes:', value);
