@@ -1,41 +1,44 @@
 <template>
   <v-snackbar
-    v-model="snackbar"
+    :model-value="visibility"
     :color="color"
     :timeout="timeout"
-    :bottom="y === 'bottom'"
-    :left="x === 'left'"
-    :right="x === 'right'"
-    :top="y === 'top'"
-    :app="false"
+    :location="location"
+    style="--v-layout-bottom: 0;"
   >
-    <p v-html="text" class="ma-0"></p>
-    <v-btn dark text @click="snackbar = false">
-        Close
+    <!-- eslint-disable-next-line vue/no-v-html -->
+    <p v-html="text" class="ma-0" />
+    <v-btn variant="text" @click="close">
+      Close
     </v-btn>
   </v-snackbar>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from 'vuex';
 
 export default {
-  name: "snackbar",
+  name: "Snackbar",
   computed: {
     ...mapState({
+      visibility: state => state.snackbar.visibility,
       text: state => state.snackbar.message.replace(/\n/g, '<br>'),
       color: state => state.snackbar.color,
       timeout: state => state.snackbar.timeout,
       x: state => state.snackbar.x,
       y: state => state.snackbar.y
     }),
-    snackbar: {
-      get() {
-        return this.$store.state.snackbar.visibility;
-      },
-      set() {
-        this.$store.commit("snackbar/setVisibility", false);
-      }
+    location: function () {
+      if (this.x === 'left' && this.y === 'top') return 'top-left';
+      if (this.x === 'right' && this.y === 'top') return 'top-right';
+      if (this.x === 'left' && this.y === 'bottom') return 'bottom-left';
+      if (this.x === 'right' && this.y === 'bottom') return 'bottom-right';
+      return 'bottom';
+    },
+  },
+  methods: {
+    close() {
+      this.$store.commit("snackbar/setVisibility", false);
     }
   }
 };

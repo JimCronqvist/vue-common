@@ -15,5 +15,10 @@
     "vue-api-query": "^1.11.0",
     "@babel/runtime": "^7.24.7",
     "dayjs": "^1.11.11"
+  },
+  "devDependencies": {
+    "eslint": "^9.4.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "eslint-plugin-vuetify": "https://github.com/corbinu/eslint-plugin-vuetify#1100ac0"
   }
 }

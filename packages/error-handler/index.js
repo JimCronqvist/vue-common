@@ -12,7 +12,7 @@ export function errorResponseHandler(error) {
     store.dispatch("snackbar/showMessage", {
       message: message,
       color: "error",
-      timeout: 0
+      timeout: -1
     }).then().catch();
   }
   return Promise.reject(error);

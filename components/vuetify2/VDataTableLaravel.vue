@@ -81,5 +81,7 @@
 </script>
 
 <style scoped>
-
+  .v-data-table-laravel :deep(.v-table__wrapper) {
+    overflow: initial;
+  }
 </style>

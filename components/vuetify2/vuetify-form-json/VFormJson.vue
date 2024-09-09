@@ -67,6 +67,7 @@
               :close-on-content-click="obj.schema.type === 'date'"
               transition="scale-transition"
               min-width="290px"
+              attach
             >
               <template #activator="{ props }">
                 <v-text-field
@@ -92,6 +93,7 @@
               :close-on-content-click="false"
               transition="scale-transition"
               min-width="290px"
+              attach
             >
               <template #activator="{ props }">
                 <v-text-field
