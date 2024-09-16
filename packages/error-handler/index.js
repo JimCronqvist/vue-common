@@ -1,4 +1,4 @@
-import store from '@/store/';
+import { useSnackbarStore } from './useSnackbarStore';
 
 export function errorResponseHandler(error) {
   // Check for errorHandle config
@@ -6,14 +6,15 @@ export function errorResponseHandler(error) {
     return Promise.reject(error);
   }
 
-  // If has response show the error
+  // If the error has a response, show the error
   if (error.response) {
     const message = error.response.data.message || error.message;
-    store.dispatch("snackbar/showMessage", {
+    const snackbarStore = useSnackbarStore();
+    snackbarStore.showMessage({
       message: message,
       color: "error",
       timeout: -1
-    }).then().catch();
+    });
   }
   return Promise.reject(error);
 }

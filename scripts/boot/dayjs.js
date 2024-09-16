@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import { selectedLocale, selectedLanguage } from './i18n';
+import { useLocaleStore } from '../../stores/locale';
 
 const locales = {
   en: () => import('dayjs/locale/en'),
@@ -12,3 +14,9 @@ export const dayjsUpdateLocale = (language) => {
     dayjs.locale(language);
   });
 };
+
+export function boot() {
+  const localeStore = useLocaleStore();
+  const locale = selectedLanguage(selectedLocale(localeStore.locale));
+  dayjsUpdateLocale(locale);
+}

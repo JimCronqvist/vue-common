@@ -1,4 +1,3 @@
-import store from '@/store';
 import router from '@/router';
 
 export default async function boot(app, imports) {
@@ -12,7 +11,7 @@ export default async function boot(app, imports) {
     let triggered = false;
     for(const key of ['boot', 'default']) {
       if(script[key] instanceof Function) {
-        const option = await script[key]({ app, store, router });
+        const option = await script[key]({ app, router });
         //console.log(script, key, option);
         Object.assign(vueOptions, option);
         triggered = true;

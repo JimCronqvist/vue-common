@@ -1,9 +1,9 @@
 <template>
   <v-snackbar
-    :model-value="visibility"
-    :color="color"
-    :timeout="timeout"
-    :location="location"
+    :model-value="snackbarStore.visibility"
+    :color="snackbarStore.color"
+    :timeout="snackbarStore.timeout"
+    :location="snackbarStore.location"
     style="--v-layout-bottom: 0;"
   >
     <!-- eslint-disable-next-line vue/no-v-html -->
@@ -15,20 +15,21 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { useSnackbarStore } from './useSnackbarStore';
 
 export default {
   name: "Snackbar",
+  setup() {
+    const snackbarStore = useSnackbarStore();
+    return { snackbarStore };
+  },
   computed: {
-    ...mapState({
-      visibility: state => state.snackbar.visibility,
-      text: state => state.snackbar.message.replace(/\n/g, '<br>'),
-      color: state => state.snackbar.color,
-      timeout: state => state.snackbar.timeout,
-      x: state => state.snackbar.x,
-      y: state => state.snackbar.y
-    }),
+    text: function() {
+      return this.snackbarStore.message.replace(/\n/g, '<br>');
+    },
     location: function () {
+      const x = this.snackbarStore.x;
+      const y = this.snackbarStore.y;
       if (this.x === 'left' && this.y === 'top') return 'top-left';
       if (this.x === 'right' && this.y === 'top') return 'top-right';
       if (this.x === 'left' && this.y === 'bottom') return 'bottom-left';
@@ -38,7 +39,7 @@ export default {
   },
   methods: {
     close() {
-      this.$store.commit("snackbar/setVisibility", false);
+      this.snackbarStore.setVisibility(false);
     }
   }
 };

@@ -80,4 +80,41 @@ export default class AbstractModel extends BaseModel {
       return self;
     })
   }
+
+  disableErrorHandleInterceptor() {
+    return this.config({ errorHandle: false} );
+  }
+
+  clone(setAttributes = {}, additionalExceptAttributes = []) {
+    const setAttributesKeys = Object.keys(setAttributes);
+    const exceptAttributes = additionalExceptAttributes.push(setAttributes);
+    const attributes = exceptAttributes.length > 0
+      ? this.getAttributes().filter(except => !exceptAttributes.includes(except))
+      : this.getAttributes();
+
+    const newObj = new this.constructor(attributes);
+    for(const relation of Object.keys(newObj.relations())) {
+      if(newObj.hasOwnProperty(relation)) {
+        if(Array.isArray(newObj[relation])) {
+          newObj[relation] = newObj[relation].map(relObj => relObj.clone());
+        } else {
+          newObj[relation] = newObj[relation].clone();
+        }
+      }
+    }
+
+    if(setAttributesKeys.length > 0) {
+      Object.assign(newObj, setAttributes);
+    }
+
+    return newObj;
+  }
+
+  getAttributes() {
+    const attributes = {};
+    for(const key of Object.keys(this)) {
+      attributes[key] = this[key];
+    }
+    return attributes;
+  }
 }

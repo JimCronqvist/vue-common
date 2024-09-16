@@ -1,5 +1,6 @@
 import { createI18n, useI18n } from 'vue-i18n';
 import axios from 'axios';
+import { useLocaleStore } from '../../stores/locale';
 
 function loadLocaleMessages() {
   //console.log('start load locale message');
@@ -66,7 +67,8 @@ const i18n = createI18n({
 export async function boot({ app, store }) {
   app.use(i18n);
 
-  const locale = selectedLocale(store.state.locale);
+  const localeStore = useLocaleStore();
+  const locale = selectedLocale(localeStore.locale);
   //const language = selectedLanguage(locale);
 
   // Load the default language

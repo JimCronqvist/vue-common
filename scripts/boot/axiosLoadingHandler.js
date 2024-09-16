@@ -1,8 +1,10 @@
 import axios from 'axios';
 import setupAxiosLoadingHandler from '../../packages/loading-handler';
+import { useLoadingStore } from '../../stores/loading';
 
-export default function ({ app, store }) {
+export default function ({ app, pinia }) {
 
-  setupAxiosLoadingHandler(axios, store);
+  const loadingStore = useLoadingStore(pinia);
+  setupAxiosLoadingHandler(axios, loadingStore);
 
 }
