@@ -184,7 +184,7 @@ export const validate = async ($event, onSuccessCallback) => {
   }
 };
 
-export function rulesToVuetify(rules, objSchema, formData) {
+export function rulesToVuetify(rules, objSchema = {}, formData = {}) {
   if(typeof rules === 'undefined') return [];
   if(typeof rules !== 'string' && !Array.isArray(rules) && typeof rules !== 'function') return rules;
 

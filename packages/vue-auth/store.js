@@ -4,9 +4,7 @@ import { defineStore } from 'pinia';
 
 // Helper function to get cookie value
 function getCookie(name) {
-  function escape(s) {
-    return s.replace(/([.*+?^$(){}|[\]/\\])/g, '\\$1');
-  }
+  const escape = s => s.replace(/([.*+?^$(){}|[\]/\\])/g, '\\$1');
   const match = document.cookie.match(RegExp('(?:^|;\\s*)' + escape(name) + '=([^;]*)'));
   return match ? match[1] : null;
 }

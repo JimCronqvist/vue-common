@@ -6,7 +6,7 @@
     "name": "Jim Cronqvist"
   },
   "scripts": {
-    "postinstall": "bash copy.sh",
+    "postinstall": "(cd node_modules/eslint-plugin-vuetify && yarn install && yarn build) && bash copy.sh",
     "copy-package": "bash copy.sh"
   },
   "version": "1.0.0",
