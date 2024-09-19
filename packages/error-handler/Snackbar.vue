@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { useSnackbarStore } from './useSnackbarStore';
+import { useSnackbarStore } from './store';
 
 export default {
   name: "Snackbar",

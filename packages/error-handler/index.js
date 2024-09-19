@@ -1,4 +1,4 @@
-import { useSnackbarStore } from './useSnackbarStore';
+import { useSnackbarStore } from './store';
 
 export function errorResponseHandler(error) {
   // Check for errorHandle config

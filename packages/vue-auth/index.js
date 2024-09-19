@@ -1,7 +1,7 @@
 import axios from 'axios';
 import createAuthRefreshInterceptor from 'axios-auth-refresh';
 import router from '@/router';
-import { useAuthStore } from './useAuthStore';
+import { useAuthStore } from './store';
 
 export default function(refreshUrl, loginFormUrl) {
 
@@ -34,4 +34,16 @@ export default function(refreshUrl, loginFormUrl) {
     return request;
   });
 
+}
+
+export function tenantAuthInterceptor() {
+  // Set up interceptor to append "?tenant=xyz" when it exists in the store
+  axios.interceptors.request.use(request => {
+    const authStore = useAuthStore();
+    const tenant = authStore.tenant;
+    if(tenant) {
+      request.params = { ...request.params, tenant: tenant};
+    }
+    return request;
+  });
 }

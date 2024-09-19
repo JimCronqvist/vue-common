@@ -27,12 +27,15 @@ export default async function boot(app, imports) {
 // Code splitting is not possible to disable per dynamic import in vite/rollup.
 // Recommended to not use dynamic imports for now, and instead do normal static imports and pass in the function
 export const bootList = () => [
-  //import('./axiosAuth'),
+  //import('./pinia'),                // Keep this as the first one
+  //import('./axiosAuth'),            // Auth should come before the error handler
+  //import('./axiosTenant'),
   //import('./axiosHttp'),
   //import('./axiosLoadingHandler'),
   //import('./axiosErrorHandler'),
   //import('./i18n'),
   //import('./dayjs'),
-  //import('./vuetify2'),
   //import('./filters'),
+  //import('./vee-validate'),
+  //import('@/plugins/vuetify'),
 ];
