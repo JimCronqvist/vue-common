@@ -6,8 +6,9 @@
     "name": "Jim Cronqvist"
   },
   "scripts": {
-    "postinstall": "(cd node_modules/eslint-plugin-vuetify && yarn install && yarn build) && bash copy.sh",
-    "copy-package": "bash copy.sh"
+    "postinstall": "bash copy.sh",
+    "copy-package": "bash copy.sh",
+    "eslint-plugin-vuetify-build": "(cd node_modules/eslint-plugin-vuetify && yarn install && yarn build)"
   },
   "version": "1.0.0",
   "description": "Vue Common - A collection of vuetify components, scripts, packages, etc. for Vue",
