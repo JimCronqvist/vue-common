@@ -20,3 +20,5 @@ export function boot() {
   const locale = selectedLanguage(selectedLocale(localeStore.locale));
   dayjsUpdateLocale(locale);
 }
+
+export default dayjs;
