@@ -1,5 +1,6 @@
 {
   "name": "@cronqvist/vue-common",
+  "type": "module",
   "author": {
     "email": "jim.cronqvist@gmail.com",
     "name": "Jim Cronqvist"
