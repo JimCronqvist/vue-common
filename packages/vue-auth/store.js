@@ -34,10 +34,10 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    login({ loginUrl, params, fetchUserUrl }) {
+    login({ loginUrl, params, fetchUserUrl, config = {}}) {
       this._setError(null);
       this._setLoading(true);
-      return axios.post(loginUrl, params, { errorHandle: false, skipAuthRefresh: true })
+      return axios.post(loginUrl, params, { errorHandle: false, skipAuthRefresh: true, ...config })
         .then(response => {
           if (response.data.access_token.length > 0) {
             this._setData(response.data);
@@ -57,7 +57,7 @@ export const useAuthStore = defineStore('auth', {
             message = 'Wrong username or password';
           }
           this._setError(message);
-          throw new Error(message);
+          throw new Error(message, { cause: error });
         })
         .finally(() => this._setLoading(false));
     },

@@ -27,6 +27,9 @@ if (typeof all === 'object') {
 // Configure default messages
 configure({
   generateMessage: (ctx, values) => {
+    if(customRuleMessages.hasOwnProperty(ctx.rule.name)) {
+      return customRuleMessages[ctx.rule.name](ctx);
+    }
     return i18n.global.t(`validations.${ctx.rule.name}`, [(ctx.label || ctx.name), ...ctx.rule.params])
   },
 });
@@ -51,3 +54,25 @@ export function boot({ app }) {
   //app.component('VeeField', Field); // Previously known as ValidationProvider in older versions
   //app.component('VeeErrorMessage', ErrorMessage);
 }
+
+const customRuleMessages = {};
+
+export function defineRuleAndMessages(name, validator, message) {
+  defineRule(name, validator);
+  defineRuleMessage(name, message);
+}
+
+export function defineRuleMessage(name, message) {
+  if(typeof message === 'string') {
+    message = () => message;
+  }
+  if(message instanceof Function) {
+    customRuleMessages[name] = message;
+  } else {
+    Object.entries(message).forEach(([locale, message]) => {
+      i18n.global.mergeLocaleMessage(locale, { validations: {[name]: convertVeeI18nToVueI18nMessages(message)} });
+    });
+  }
+}
+
+export { i18n };

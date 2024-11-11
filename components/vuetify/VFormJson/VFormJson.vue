@@ -196,7 +196,7 @@ export function rulesToVuetify(rules, objSchema = {}, formData = {}) {
       return value => {
         const passes = veeValidate(value, rule, {
           name: objSchema.name,
-          label: objSchema.label,
+          label: objSchema.label ?? objSchema.name,
           values: formData,
         });
         return passes.then(value => {
