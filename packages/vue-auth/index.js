@@ -47,3 +47,13 @@ export function tenantAuthInterceptor() {
     return request;
   });
 }
+
+export function apiUrlInterceptor() {
+  // Set up interceptor to prepend the VITE_API_URL environment variable to the url when a relative url is used
+  axios.interceptors.request.use(request => {
+    if (!/^https?:\/\//i.test(request.url)) {
+      request.url = (import.meta.env.VITE_API_URL || '') + request.url; // process.env.VITE_API_URL
+    }
+    return request;
+  });
+}
