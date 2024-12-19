@@ -9,16 +9,16 @@ export function usePlatform() {
     return 'web';
   });
 
-  const phoneApp = computed(() => platform.value === 'android' || platform.value === 'ios');
+  const isPhoneApp = computed(() => platform.value === 'android' || platform.value === 'ios');
 
-  const desktopApp = computed(() => platform.value === 'electron');
+  const isDesktopApp = computed(() => platform.value === 'electron');
 
-  const web = computed(() => platform.value === 'web');
+  const isWeb = computed(() => platform.value === 'web');
 
   return {
     platform,
-    phoneApp,
-    desktopApp,
-    web,
+    isPhoneApp,
+    isDesktopApp,
+    isWeb,
   };
 }
