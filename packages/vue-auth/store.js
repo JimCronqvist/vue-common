@@ -3,11 +3,11 @@ import _get from 'lodash/get';
 import { defineStore } from 'pinia';
 
 // Helper function to get cookie value
-function getCookie(name) {
+export const getCookie = (name) => {
   const escape = s => s.replace(/([.*+?^$(){}|[\]/\\])/g, '\\$1');
   const match = document.cookie.match(RegExp('(?:^|;\\s*)' + escape(name) + '=([^;]*)'));
   return match ? match[1] : null;
-}
+};
 
 export const useAuthStore = defineStore('auth', {
   persist: { debug: true }, // Persist the store in localStorage
