@@ -4,7 +4,7 @@ import { useLocaleStore } from '../../stores/locale';
 
 function loadLocaleMessages() {
   //console.log('start load locale message');
-  const locales = import.meta.glob('/src/locales/*.json'); // Absolute path is relative to the project root
+  const locales = import.meta.glob(['/src/locales/*.json', '/locales/*.json']); // Absolute path is relative to the project root
   const messages = {};
   Object.keys(locales).forEach(key => {
     const matched = key.match(/([A-Za-z0-9-_]+)\./i);
