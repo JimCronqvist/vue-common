@@ -1,6 +1,6 @@
 import { createI18n, useI18n } from 'vue-i18n';
-import axios from 'axios';
 import { useLocaleStore } from '../../stores/locale';
+import { markRaw } from 'vue';
 
 function loadLocaleMessages() {
   //console.log('start load locale message');
@@ -39,7 +39,7 @@ function checkDefaultLanguage(storeLocale) {
 // If we want to add different dateTimeFormats per locale in the future:
 // See: https://github.com/preetishhs/vue-localization-techniques/blob/master/src/locales/formats/dataTimeFormats.js
 
-export async function setI18nLanguage(lang) {
+export async function setI18nLanguage(i18n, lang, axios) {
   console.log('Set i18n language to '+lang);
   if(!languages.includes(lang)) return Promise.reject('setI18nLanguage: i18n language does not exist');
 
@@ -50,7 +50,11 @@ export async function setI18nLanguage(lang) {
     } else {
       i18n.global.locale.value = lang;
     }
-    axios.defaults.headers.common['Accept-Language'] = lang;
+    if(axios) {
+      axios.defaults.headers.common['Accept-Language'] = lang;
+    } else {
+      console.warn('axios was not available in setI18nLanguage, header "Accept-Language" has not be updated.');
+    }
     document.querySelector('html').setAttribute('lang', lang);
   });
 }
@@ -59,24 +63,30 @@ export const languages = Object.getOwnPropertyNames(loadLocaleMessages());
 export const selectedLocale = storeLocale => checkDefaultLanguage(storeLocale) || import.meta.env.VITE_I18N_LOCALE || 'en-US';
 export const selectedLanguage = selectedLocale => selectedLocale.split('-')[0];
 
-const i18n = createI18n({
-  legacy: false, // Vuetify does not support the legacy mode of vue-i18n
-  fallbackLocale: import.meta.env.VITE_I18N_LOCALE || 'en-US',
-});
+export function createI18nPiniaPlugin(i18n) {
+  return ({ store }) => {
+    // Attach the i18n instance to the store as a non-reactive property. markRaw() prevents Pinia from trying to proxy
+    // i18n again, which would otherwise unwrap or overwrite its internal refs (like i18n.global.locale).
+    store.$i18n = markRaw(i18n);
+  }
+}
 
-export async function boot({ app, store }) {
+export async function boot(app, { $pinia, $http }) {
+  const i18n = createI18n({
+    legacy: false, // Vuetify does not support the legacy mode of vue-i18n
+    fallbackLocale: import.meta.env.VITE_I18N_LOCALE || 'en-US',
+  });
+
   app.use(i18n);
+  $pinia.use(createI18nPiniaPlugin(i18n));
 
-  const localeStore = useLocaleStore();
+  app.config.globalProperties.$i18n = i18n; // Set by the vue-i18n plugin
+  app.config.globalProperties.useI18n = useI18n;
+
+  const localeStore = useLocaleStore($pinia);
   const locale = selectedLocale(localeStore.locale);
   //const language = selectedLanguage(locale);
 
   // Load the default language
-  await setI18nLanguage(locale);
-
-  return { i18n };
+  await setI18nLanguage(i18n, locale, $http);
 }
-
-export { useI18n };
-
-export default i18n;

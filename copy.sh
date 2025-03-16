@@ -23,7 +23,9 @@ fi
 
 # If there is no mount, copy the files
 if [ "$(mount | grep -c "/$MOUNT_CHECK")" -eq 0 ]; then
-    mkdir -p "$PACKAGES_DIR/"
-    rm -rf "$PACKAGE_DIR" && cp -r "$NODE_MODULES_PACKAGE_DIR" "$PACKAGES_DIR/"
-    echo '*' > "$PACKAGE_DIR/.gitignore"
+    if [ -d "$NODE_MODULES_PACKAGE_DIR" ]; then
+        mkdir -p "$PACKAGES_DIR/"
+        rm -rf "$PACKAGE_DIR" && cp -r "$NODE_MODULES_PACKAGE_DIR" "$PACKAGES_DIR/"
+        echo '*' > "$PACKAGE_DIR/.gitignore"
+    fi
 fi

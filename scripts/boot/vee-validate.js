@@ -1,5 +1,3 @@
-import i18n from './i18n';
-
 import { defineRule, configure, normalizeRules, Form, Field, ErrorMessage } from 'vee-validate';
 
 import { all } from '@vee-validate/rules';
@@ -24,15 +22,17 @@ if (typeof all === 'object') {
   defineRule('confirmed', confirmed);
 }
 
-// Configure default messages
-configure({
-  generateMessage: (ctx, values) => {
-    if(customRuleMessages.hasOwnProperty(ctx.rule.name)) {
-      return customRuleMessages[ctx.rule.name](ctx);
-    }
-    return i18n.global.t(`validations.${ctx.rule.name}`, [(ctx.label || ctx.name), ...ctx.rule.params])
-  },
-});
+export function configureDefaultMessages(i18n) {
+  // Configure default messages
+  configure({
+    generateMessage: (ctx, values) => {
+      if(customRuleMessages.hasOwnProperty(ctx.rule.name)) {
+        return customRuleMessages[ctx.rule.name](ctx);
+      }
+      return i18n.global.t(`validations.${ctx.rule.name}`, [(ctx.label || ctx.name), ...ctx.rule.params])
+    },
+  });
+}
 
 export function convertVeeI18nToVueI18nMessages(messages) {
   const transformed = {};
@@ -46,9 +46,11 @@ export function convertVeeI18nToVueI18nMessages(messages) {
   return transformed;
 }
 
-export function boot({ app }) {
-  i18n.global.mergeLocaleMessage('sv-SE', { validations: convertVeeI18nToVueI18nMessages(sv.messages) });
-  i18n.global.mergeLocaleMessage('en-US', { validations: convertVeeI18nToVueI18nMessages(en.messages) });
+export function boot(app, { $i18n }) {
+  configureDefaultMessages($i18n);
+
+  $i18n.global.mergeLocaleMessage('sv-SE', { validations: convertVeeI18nToVueI18nMessages(sv.messages) });
+  $i18n.global.mergeLocaleMessage('en-US', { validations: convertVeeI18nToVueI18nMessages(en.messages) });
 
   //app.component('VeeForm', Form); // Previously known as ValidationObserver in older versions
   //app.component('VeeField', Field); // Previously known as ValidationProvider in older versions
@@ -57,12 +59,12 @@ export function boot({ app }) {
 
 const customRuleMessages = {};
 
-export function defineRuleAndMessages(name, validator, message) {
+export function defineRuleAndMessages(i18n, name, validator, message) {
   defineRule(name, validator);
-  defineRuleMessage(name, message);
+  defineRuleMessage(i18n, name, message);
 }
 
-export function defineRuleMessage(name, message) {
+export function defineRuleMessage(i18n, name, message) {
   if(typeof message === 'string') {
     message = () => message;
   }
@@ -74,5 +76,3 @@ export function defineRuleMessage(name, message) {
     });
   }
 }
-
-export { i18n };

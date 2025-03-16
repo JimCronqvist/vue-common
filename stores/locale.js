@@ -18,7 +18,11 @@ export const useLocaleStore = defineStore('locale', {
 
     async changeLocale(newLocale) {
       await dayjsUpdateLocale(newLocale);
-      await setI18nLanguage(newLocale);
+      if(this.$i18n) {
+        await setI18nLanguage(this.$i18n, newLocale, this.$http);
+      } else {
+        console.warn('$i18n was not available in changeLocale, store will be updated, but not i18n.');
+      }
       await this._setLocale(newLocale);
     },
   },

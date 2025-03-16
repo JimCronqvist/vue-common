@@ -15,10 +15,9 @@ export const dayjsUpdateLocale = (language) => {
   });
 };
 
-export function boot() {
-  const localeStore = useLocaleStore();
+export function boot(app, { $pinia }) {
+  const localeStore = useLocaleStore($pinia);
   const locale = selectedLanguage(selectedLocale(localeStore.locale));
   dayjsUpdateLocale(locale);
+  app.config.globalProperties.$dayjs = dayjs;
 }
-
-export default dayjs;

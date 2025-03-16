@@ -1,13 +1,12 @@
-import axios from 'axios';
 import createAuthRefreshInterceptor from 'axios-auth-refresh';
 import router from '@/router';
 import { useAuthStore } from './store';
 
-export default function(refreshUrl, loginFormUrl) {
+export default function({ axios, pinia }, refreshUrl, loginFormUrl) {
 
   // Axios interceptor function that will be called to refresh the auth on failed request due to a 401 status code
-  const refreshAuthLogic = failedRequest => axios.post(refreshUrl).then(response => {
-    const authStore = useAuthStore();
+  const refreshAuthLogic = failedRequest => axios.post(refreshUrl, {}, { skipAuthRefresh: true }).then(response => {
+    const authStore = useAuthStore(pinia);
     authStore.setData(response.data);
   }).catch(error => {
     console.warn('Could not refresh the token', error);
@@ -19,14 +18,12 @@ export default function(refreshUrl, loginFormUrl) {
     }
   });
 
-  // Instantiate the interceptor (you can chain it as it returns the axios instance)
-  createAuthRefreshInterceptor(axios, refreshAuthLogic, {
-    pauseInstanceWhileRefreshing: true,
-  });
+  // Attach the interceptor
+  createAuthRefreshInterceptor(axios, refreshAuthLogic);
 
   // Use interceptor to inject the Bearer Token from the store to the requests when one exists
   axios.interceptors.request.use(request => {
-    const authStore = useAuthStore();
+    const authStore = useAuthStore(pinia);
     const accessToken = authStore.getToken;
     if(accessToken !== null) {
       request.headers['Authorization'] = `Bearer ${accessToken}`;
@@ -36,10 +33,10 @@ export default function(refreshUrl, loginFormUrl) {
 
 }
 
-export function tenantAuthInterceptor() {
+export function tenantAuthInterceptor({ axios, pinia }) {
   // Set up interceptor to append "?tenant=xyz" when it exists in the store
   axios.interceptors.request.use(request => {
-    const authStore = useAuthStore();
+    const authStore = useAuthStore(pinia);
     const tenant = authStore.tenant;
     if(tenant) {
       request.params = { ...request.params, tenant: tenant};
@@ -48,7 +45,7 @@ export function tenantAuthInterceptor() {
   });
 }
 
-export function apiUrlInterceptor() {
+export function apiUrlInterceptor(axios) {
   // Set up interceptor to prepend the VITE_API_URL environment variable to the url when a relative url is used
   axios.interceptors.request.use(request => {
     if (!/^https?:\/\//i.test(request.url)) {
