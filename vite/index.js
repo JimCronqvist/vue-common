@@ -22,7 +22,13 @@ export default function baseConfig(workingDir = '/app') {
   }
 };
 
-export function viteResolveMountAliasForPackage(dependency, packagePath = '/app/packages/') {
+export function isMounted(dependency, packagePath = '/app/packages/') {
+  const name = dependency.split('/')[1] ?? dependency;
+  packagePath = packagePath.replace(/\/$/, '')+'/'; // Ensure trailing slash
+  return fs.existsSync(`${packagePath}${name}/package.json`);
+}
+
+export function resolveAliasForPackageMount(dependency, packagePath = '/app/packages/') {
   const name = dependency.split('/')[1] ?? dependency;
   packagePath = packagePath.replace(/\/$/, '')+'/'; // Ensure trailing slash
   if(fs.existsSync(`${packagePath}${name}/package.json`)) {
