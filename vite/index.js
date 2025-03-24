@@ -26,7 +26,7 @@ export function viteResolveMountAliasForPackage(dependency, packagePath = '/app/
   const name = dependency.split('/')[1] ?? dependency;
   packagePath = packagePath.replace(/\/$/, '')+'/'; // Ensure trailing slash
   if(fs.existsSync(`${packagePath}${name}/package.json`)) {
-    return { find: dependency, replacement: packagePath+name }
+    return { find: dependency, replacement: packagePath+name };
   }
   return null;
 }
