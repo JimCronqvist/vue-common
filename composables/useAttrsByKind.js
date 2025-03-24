@@ -1,5 +1,7 @@
-import omitBy from 'lodash/omitBy';
 import { computed, useAttrs } from 'vue';
+
+const omitBy = (object, predicate) =>
+    Object.fromEntries(Object.entries(object).filter(([key, value]) => !predicate(value, key)));
 
 /**
  * Extract the attributes from the component and separate them by kind. Useful when you want to pass the attributes to

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import _get from 'lodash/get';
 import { defineStore } from 'pinia';
 
 // Helper function to get cookie value
@@ -52,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
           return response;
         })
         .catch(error => {
-          let message = _get(error, 'response.data.message', error.message);
+          let message = error?.response?.data?.message ?? error.message;
           if (message === 'Incorrect user credentials.') {
             message = 'Wrong username or password';
           }
