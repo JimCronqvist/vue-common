@@ -16,7 +16,7 @@ export default function baseConfig(workingDir = '/app') {
       alias: [
         { find: '@', replacement: path.resolve(workingDir,'./src') },
         // Enable easier live editing for dependencies, by optional mounting of local packages in docker-compose
-        viteResolveMountAliasForPackage('@cronqvist/vue-common', workingDir+'/packages/'),
+        resolveAliasForPackageMount('@cronqvist/vue-common', workingDir+'/packages/'),
       ].filter(x => x), // removes null values
     }
   }
