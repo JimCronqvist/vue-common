@@ -16,10 +16,10 @@ export default function baseConfig(workingDir = '/app') {
       alias: [
         { find: '@', replacement: path.resolve(workingDir,'./src') },
         // Enable easier live editing for dependencies, by optional mounting of local packages in docker-compose
-        resolveAliasForPackageMount('@cronqvist/vue-common', workingDir+'/packages/'),
-      ].filter(x => x), // removes null values
-    }
-  }
+        resolveAliasForPackageMount('@cronqvist/vue-common', workingDir+'/packages/', workingDir+'/node_modules/'),
+      ],
+    },
+  };
 };
 
 export function isMounted(dependency, packagePath = '/app/packages/') {
@@ -28,11 +28,14 @@ export function isMounted(dependency, packagePath = '/app/packages/') {
   return fs.existsSync(`${packagePath}${name}/package.json`);
 }
 
-export function resolveAliasForPackageMount(dependency, packagePath = '/app/packages/') {
+export function resolveAliasForPackageMount(dependency, packagePath = '/app/packages/', nodeModulesPath = '/app/node_modules/') {
   const name = dependency.split('/')[1] ?? dependency;
   packagePath = packagePath.replace(/\/$/, '')+'/'; // Ensure trailing slash
   if(fs.existsSync(`${packagePath}${name}/package.json`)) {
     return { find: dependency, replacement: packagePath+name };
+  } else if(nodeModulesPath) {
+    nodeModulesPath = nodeModulesPath.replace(/\/$/, '')+'/'; // Ensure trailing slash
+    return { find: dependency, replacement: nodeModulesPath+dependency };
   }
   return null;
 }
