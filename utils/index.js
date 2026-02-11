@@ -1,3 +1,4 @@
+import { isRef, isProxy, toRaw } from 'vue';
 
 /**
  * Sets a property in an object immutably using a dot-separated path.
@@ -51,4 +52,87 @@ export function multiSort(array, fields) {
     }
     return 0;
   });
+}
+
+/**
+ * Debounce function execution by specified wait time.
+ *
+ * @param callback
+ * @param wait
+ * @returns {(function(...[*]): void)|*}
+ */
+export function debounce(callback, wait = 100) {
+  let timeoutID = null;
+  return (...args) => {
+    clearTimeout(timeoutID);
+    timeoutID = setTimeout(async () => {
+      await callback.apply(this, args);
+    }, wait);
+  };
+}
+
+/**
+ * Simple deep equality check between two objects.
+ *
+ * @param obj1
+ * @param obj2
+ * @returns {boolean}
+ */
+export function isEqual(obj1, obj2) {
+  // Check if they are the exact same reference
+  if(obj1 === obj2) return true;
+
+  // Handle nulls or primitive mismatches
+  if(obj1 == null || obj2 == null || typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+    return false;
+  }
+
+  // Get keys for both
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  // Must have the same number of properties
+  if(keys1.length !== keys2.length) return false;
+
+  // Recursively compare every property
+  for(const key of keys1) {
+    if (!keys2.includes(key) || !isEqual(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Deeply clones a value into plain, non-reactive JavaScript data.
+ *
+ * - Explicitly unwraps Vue refs (ref / computed → .value)
+ * - Strips Vue reactivity (reactive / readonly → raw object)
+ * - Uses `structuredClone` to break all shared references
+ *
+ * IMPORTANT:
+ * This helper is intended for DTO-like data only.
+ *
+ * Do NOT pass:
+ * - class instances (prototypes & methods are not preserved)
+ *   → If a class needs cloning, define an explicit `clone()` method
+ *     and call it directly instead of using this helper.
+ * - functions
+ * - DOM nodes
+ * - non-Vue Proxies (e.g. user-created or library proxies)
+ *
+ * Nested non-plain objects may cause `structuredClone` to throw
+ * or result in semantic data loss.
+ *
+ * Use this at boundaries (API payloads, router params, drafts),
+ * not inside reactive mutation logic.
+ *
+ * @param {*} value - A value, ref, or reactive object to clone
+ * @returns {*} A deep-cloned, non-reactive copy of the value
+ */
+export function deepCloneValue(value) {
+  const v = isRef(value) ? value.value : value;   // unwrap refs intentionally
+  const raw = isProxy(v) ? toRaw(v) : v;          // strip Vue proxies
+  return structuredClone(raw);                    // deep clone
 }
