@@ -136,3 +136,60 @@ export function deepCloneValue(value) {
   const raw = isProxy(v) ? toRaw(v) : v;          // strip Vue proxies
   return structuredClone(raw);                    // deep clone
 }
+
+/**
+ * Creates a performance timer for measuring multistep operations.
+ *
+ * - `log(step)` logs and returns the time delta since the previous log (or start).
+ * - `end(skipLog)` logs (unless skipped) and returns the total duration.
+ *
+ * All durations are rounded to 2 decimal places (milliseconds).
+ *
+ * @param {string} [label] - Optional label used as prefix in console output.
+ * @returns {{
+ *   log: (step?: string) => number,
+ *   end: (skipLog?: boolean) => number
+ * }}
+ */
+export function createTimer(label) {
+  const start = performance.now();
+  let last = start;
+  let ended = false;
+
+  const round = (ms) => +ms.toFixed(2);
+  const now = () => performance.now();
+
+  function log(step = '') {
+    if(ended) return 0;
+
+    const current = now();
+    const delta = round(current - last);
+    const total = round(current - start);
+
+    last = current;
+
+    const prefix = label ? label : '';
+    const stepPart = step ? (prefix ? ` - ${step}` : step) : '';
+
+    console.debug(`${prefix}${stepPart}: +${delta} ms (total ${total} ms)`);
+
+    return delta;
+  }
+
+  function end(skipLog = false) {
+    if(ended) return 0;
+
+    ended = true;
+    const total = round(now() - start);
+
+    if(!skipLog) {
+      label
+        ? console.debug(`${label} - done: ${total} ms`)
+        : console.debug(`Done: ${total} ms`);
+    }
+
+    return total;
+  }
+
+  return { log, end };
+}
