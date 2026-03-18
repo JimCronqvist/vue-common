@@ -26,7 +26,9 @@ export const useAuthStore = defineStore('auth', {
     },
     hasScope: state => scope => {
       if (state.user !== null && state.user.hasOwnProperty('permissions') && Array.isArray(state.user.permissions)) {
-        return state.user.permissions.includes(scope);
+        return Array.isArray(scope)
+          ? scope.some((s) => state.user.permissions.includes(s))
+          : state.user.permissions.includes(scope);
       }
       return false;
     },
