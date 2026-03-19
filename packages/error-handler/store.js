@@ -7,7 +7,8 @@ export const useSnackbarStore = defineStore('snackbar', {
     color: "error",
     timeout: 6000,
     x: null,
-    y: "bottom"
+    y: "bottom",
+    closable: true,
   }),
 
   actions: {
