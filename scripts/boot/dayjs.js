@@ -19,3 +19,5 @@ export function boot(app, { $pinia }) {
   localeStore.registerChangeLocaleCallback(true, (locale, language) => dayjsUpdateLocale(language));
   app.config.globalProperties.$dayjs = dayjs;
 }
+
+export default dayjs;
