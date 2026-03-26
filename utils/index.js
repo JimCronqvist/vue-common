@@ -194,7 +194,7 @@ export function createTimer(label) {
   return { log, end };
 }
 
-export function getErrorMessage(error, { mode = 'api', fallbackMessage = 'An unknown error occurred.' } = {}) {
+export function getErrorMessage(error, inspectHttpResponse = true, fallbackMessage = 'An unknown error occurred.') {
   if(!error) return fallbackMessage;
 
   if(typeof error === 'string') {
@@ -206,7 +206,7 @@ export function getErrorMessage(error, { mode = 'api', fallbackMessage = 'An unk
     const response = error.response;
 
     // Only parse response body in API mode
-    if(mode === 'api' && response?.data) {
+    if(inspectHttpResponse && response?.data) {
       const data = response.data;
 
       if(typeof data === 'string') return data;
@@ -243,7 +243,7 @@ export function getErrorMessage(error, { mode = 'api', fallbackMessage = 'An unk
 
   // Generic http responses (fetch, etc.)
   if(typeof error === 'object') {
-    if(mode === 'api') {
+    if(inspectHttpResponse) {
       if(error.message) return error.message;
 
       if(error.error) {
