@@ -194,7 +194,7 @@ export function createTimer(label) {
   return { log, end };
 }
 
-export function getErrorMessage(error, fallbackMessage = 'An unknown error occurred.') {
+export function getErrorMessage(error, { mode = 'api', fallbackMessage = 'An unknown error occurred.' } = {}) {
   if(!error) return fallbackMessage;
 
   if(typeof error === 'string') {
@@ -202,50 +202,76 @@ export function getErrorMessage(error, fallbackMessage = 'An unknown error occur
   }
 
   // Axios specific
-  if(error.isAxiosError && error.response?.data) {
-    const data = error.response.data;
+  if(error.isAxiosError) {
+    const response = error.response;
 
-    if(typeof data === 'string') return data;
+    // Only parse response body in API mode
+    if(mode === 'api' && response?.data) {
+      const data = response.data;
 
-    if(data.message) return data.message;
+      if(typeof data === 'string') return data;
 
-    if(data.error) {
-      if(typeof data.error === 'string') return data.error;
-      if(data.error.message) {
-        return data.error.code ? `${data.error.message} (${data.error.code})` : data.error.message;
+      if(data.message) return data.message;
+      if(data.error) {
+        if(typeof data.error === 'string') return data.error;
+        if(data.error.message) {
+          return data.error.code ? `${data.error.message} (${data.error.code})` : data.error.message;
+        }
       }
+
+      if(data.data?.message) return data.data.message;
+      if(data.data?.error) return data.data.error;
     }
 
-    if(data.data?.message) return data.data.message;
-    if(data.data?.error) return data.data.error;
-  }
-
-  // Axios fallback
-  if(error.response?.status && error.response?.statusText) {
-    return `Request failed with status ${error.response.status} (${error.response.statusText})`;
-  }
-
-  if(error.request) {
-    return 'No response received from server.';
-  }
-
-  if(error instanceof Error) {
-    return error.message;
+    // Axios fallback
+    if(response?.status && response?.statusText) {
+      return `Request failed with status ${response.status} (${response.statusText})`;
+    }
+    if(response?.status) {
+      return `Request failed with status ${response.status}`;
+    }
+    if(error.code === 'ECONNABORTED') {
+      return 'Request timed out.';
+    }
+    if(error.message === 'Network Error') {
+      return 'Network error. Check your connection.';
+    }
+    if(error.request) {
+      return 'No response received from server.';
+    }
   }
 
   // Generic http responses (fetch, etc.)
   if(typeof error === 'object') {
-    if(error.message) return error.message;
+    if(mode === 'api') {
+      if(error.message) return error.message;
 
-    if(error.error) {
-      if(typeof error.error === 'string') return error.error;
-      if(error.error.message) {
-        return error.error.code ? `${error.error.message} (${error.error.code})` : error.error.message;
+      if(error.error) {
+        if(typeof error.error === 'string') return error.error;
+        if(error.error.message) {
+          return error.error.code ? `${error.error.message} (${error.error.code})` : error.error.message;
+        }
       }
+
+      if(error.data?.message) return error.data.message;
+      if(error.data?.error) return error.data.error;
     }
 
-    if(error.data?.message) return error.data.message;
-    if(error.data?.error) return error.data.error;
+    // Always allow status fallback
+    if(error.status && error.statusText) {
+      return `Request failed with status ${error.status} (${error.statusText})`;
+    }
+
+    if(error.status) {
+      return `Request failed with status ${error.status}`;
+    }
+
+    // message fallback (also useful in http mode)
+    if(error.message) return error.message;
+  }
+
+  if(error instanceof Error) {
+    return error.message;
   }
 
   return fallbackMessage;
