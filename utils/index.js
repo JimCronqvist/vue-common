@@ -193,3 +193,48 @@ export function createTimer(label) {
 
   return { log, end };
 }
+
+export function getErrorMessage(error, fallbackMessage = 'An unknown error occurred.') {
+  if(!error) return fallbackMessage;
+
+  if(typeof error === 'string') {
+    return error;
+  }
+
+  if(error instanceof Error) {
+    return error.message;
+  }
+
+  // Axios specific
+  if(error.isAxiosError && error.response?.data) {
+    const data = error.response.data;
+
+    if(typeof data === 'string') return data;
+
+    if(data.message) return data.message;
+    if(data.error) return data.error;
+
+    if(data.data?.message) return data.data.message;
+    if(data.data?.error) return data.data.error;
+  }
+
+  // Generic http responses (fetch, etc.)
+  if (typeof error === 'object') {
+    if(error.message) return error.message;
+    if(error.error) return error.error;
+
+    if(error.data?.message) return error.data.message;
+    if(error.data?.error) return error.data.error;
+  }
+
+  // Axios fallback
+  if(error.response?.status && error.response?.statusText) {
+    return `Request failed with status ${error.response.status}: ${error.response.statusText}`;
+  }
+
+  if(error.request) {
+    return 'No response received from server.';
+  }
+
+  return fallbackMessage;
+}
