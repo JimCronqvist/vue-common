@@ -208,7 +208,13 @@ export function getErrorMessage(error, fallbackMessage = 'An unknown error occur
     if(typeof data === 'string') return data;
 
     if(data.message) return data.message;
-    if(data.error) return data.error;
+
+    if(data.error) {
+      if(typeof data.error === 'string') return data.error;
+      if(data.error.message) {
+        return data.error.code ? `${data.error.message} (${data.error.code})` : data.error.message;
+      }
+    }
 
     if(data.data?.message) return data.data.message;
     if(data.data?.error) return data.data.error;
@@ -216,7 +222,7 @@ export function getErrorMessage(error, fallbackMessage = 'An unknown error occur
 
   // Axios fallback
   if(error.response?.status && error.response?.statusText) {
-    return `Request failed with status ${error.response.status}: ${error.response.statusText}`;
+    return `Request failed with status ${error.response.status} (${error.response.statusText})`;
   }
 
   if(error.request) {
@@ -228,9 +234,15 @@ export function getErrorMessage(error, fallbackMessage = 'An unknown error occur
   }
 
   // Generic http responses (fetch, etc.)
-  if (typeof error === 'object') {
+  if(typeof error === 'object') {
     if(error.message) return error.message;
-    if(error.error) return error.error;
+
+    if(error.error) {
+      if(typeof error.error === 'string') return error.error;
+      if(error.error.message) {
+        return error.error.code ? `${error.error.message} (${error.error.code})` : error.error.message;
+      }
+    }
 
     if(error.data?.message) return error.data.message;
     if(error.data?.error) return error.data.error;
