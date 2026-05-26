@@ -36,6 +36,10 @@ export default function({ axios, pinia }, refreshUrl, loginFormUrl) {
 export function tenantAuthInterceptor({ axios, pinia }) {
   // Set up interceptor to append "?tenant=xyz" when it exists in the store
   axios.interceptors.request.use(request => {
+    if(request.skipTenantAuthInterceptor) {
+      return request;
+    }
+
     const authStore = useAuthStore(pinia);
     const tenant = authStore.tenant;
     if(tenant) {
