@@ -6,16 +6,29 @@ export function errorResponseHandler(error) {
     return Promise.reject(error);
   }
 
-  // If the error has a response, show the error
+  const snackbarStore = useSnackbarStore();
+  let message;
+
   if (error.response) {
-    const message = error.response.data.message || error.message;
-    const snackbarStore = useSnackbarStore();
-    snackbarStore.showMessage({
-      message: message,
-      color: "error",
-      timeout: -1
-    });
+    // HTTP Errors 400/500
+    message = error.response.data?.message || error.message;
+  } else if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+    // Timeouts
+    message = 'Request timed out';
+  } else if (error.request) {
+    // General Network errors
+    message = 'Network error';
+  } else {
+    // Unknown
+    message = error.message;
   }
+
+  snackbarStore.showMessage({
+    message: message,
+    color: "error",
+    timeout: -1
+  });
+
   return Promise.reject(error);
 }
 
