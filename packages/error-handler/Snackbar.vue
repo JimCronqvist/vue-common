@@ -27,7 +27,7 @@ export default {
     watch(
       () => snackbarStore.visibility,
       (visible) => {
-        if (visible && snackbarStore.timeout) {
+        if (visible && snackbarStore.timeout > 0) {
           setTimeout(() => {
             snackbarStore.setVisibility(false);
           }, snackbarStore.timeout);
