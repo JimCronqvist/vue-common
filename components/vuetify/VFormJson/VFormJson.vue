@@ -154,8 +154,8 @@
 <script>
 // Inspired by: https://github.com/wotamann/vuetify-form-base
 
-import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VTextarea, VSelect } from 'vuetify/components';
-import { VTimePicker, VDateInput } from 'vuetify/labs/components';
+import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VTextarea, VSelect, VTimePicker } from 'vuetify/components';
+import { VDateInput } from 'vuetify/labs/components';
 
 import { validate as veeValidate, normalizeRules } from 'vee-validate';
 
