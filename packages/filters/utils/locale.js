@@ -1,5 +1,6 @@
-import store from '@/store';
+import { useLocaleStore } from '../../../stores/locale';
 
 export default function getLocale() {
-  return store.state.locale;
+  const localeStore = useLocaleStore();
+  return localeStore.locale;
 };

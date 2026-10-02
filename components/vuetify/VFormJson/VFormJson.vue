@@ -1,0 +1,456 @@
+<template>
+  <v-row>
+    <template v-for="(obj, index) in flatCombinedArray" :key="index">
+      <v-col
+        v-show="!obj.schema.hidden"
+        v-bind="getColBind(obj)"
+        :class="getClassName(obj)"
+      >
+        <!-- slot on top of item  -> <v-btn slot="top-slot-[key]> -->
+        <slot :name="`slot-top-type-${getType(obj)}`" />
+        <slot :name="`slot-top-key-${getKeyAsClass(obj)}`" />
+
+        <!-- slot replaces complete item of defined type -> <div slot="item-slot-[type]>-->
+        <slot :name="`slot-item-type-${getType(obj)}`">
+          <!-- slot replaces complete item of defined key -> <div slot="item-slot-[key]>-->
+          <slot :name="`slot-item-key-${getKeyAsClass(obj)}`">
+            <!-- radio -->
+            <v-radio-group
+              v-if="obj.schema.type === 'radio'"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+              :model-value="setValue(obj)"
+              @update:model-value="onInput($event, obj)"
+            >
+              <v-radio
+                v-for="(o,ix) in obj.schema.options"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+                :key="ix"
+                :label="sanitizeRadioOption(o).label"
+                :model-value="sanitizeRadioOption(o).value"
+              />
+            </v-radio-group>
+
+            <!-- checkbox || switch -->
+            <component
+              :true-value="1"
+              :false-value="0"
+              v-else-if="obj.schema.type === 'switch' || obj.schema.type === 'checkbox'"
+              :is="mapTypeToComponent(obj.schema.type)"
+              :model-value="setValue(obj)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+              @update:model-value="onInput($event, obj)"
+            />
+
+            <!-- file -->
+            <v-file-input
+              v-else-if="obj.schema.type === 'file'"
+              :model-value="setValue(obj)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+              @change="onInput($event, obj)"
+            />
+
+            <!-- date -->
+            <v-date-input
+              prepend-icon=""
+              prepend-inner-icon="$calendar"
+              clearable
+              v-else-if="obj.schema.type === 'date'"
+              :model-value="setValue(obj)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+              @update:model-value="onDate($event, obj)"
+              type="text"
+            />
+
+            <!-- time -->
+            <v-menu
+              v-else-if="obj.schema.type === 'time'"
+              :close-on-content-click="obj.schema.type === 'date'"
+              transition="scale-transition"
+              min-width="290px"
+            >
+              <template #activator="{ props }">
+                <v-text-field
+                  prepend-inner-icon="mdi-clock-outline"
+                  clearable
+                  readonly
+                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+                  :model-value="setValue(obj)"
+                  @update:model-value="onInput($event, obj)"
+                  type="text"
+                />
+              </template>
+              <component
+                :is="mapTypeToComponent(obj.schema.type)"
+                @update:model-value="onInput($event, obj)"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+              />
+            </v-menu>
+
+            <!-- color -->
+            <v-menu
+              v-else-if="obj.schema.type === 'color'"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              min-width="290px"
+            >
+              <template #activator="{ props }">
+                <v-text-field
+                  clearable
+                  readonly
+                  v-bind="{...props, ...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+                  :model-value="obj.value"
+                  @update:model-value="onInput($event, obj)"
+                  type="text"
+                >
+                  <template #prepend-inner>
+                    <v-sheet
+                      v-if="obj.value"
+                      style="margin: 0 3px"
+                      height="20"
+                      width="18"
+                      :color="obj.value || 'transparent'"
+                    />
+                    <v-icon v-else>
+                      mdi-format-color-fill
+                    </v-icon>
+                  </template>
+                </v-text-field>
+              </template>
+              <v-color-picker
+                mode="hex"
+                :modes="['hex', 'rgb']"
+                @update:model-value="onColor($event, obj)"
+                v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+                :model-value="setValue(obj) || '#000000'"
+              />
+            </v-menu>
+
+            <!-- All other Types -->
+            <component
+              v-else
+              :is="mapTypeToComponent(obj.schema.type)"
+              v-bind="{...obj.schema, rules: rulesToVuetify(obj.schema.rules, obj.schema, storeStateData)}"
+              v-on="getInputOn(obj.schema)"
+              :model-value="setValue(obj)"
+              @update:model-value="onInput($event, obj)"
+              :menu-props="{ offsetY: true }"
+            >
+              {{ typeof obj.schema['v-text'] !== 'undefined' ? obj.schema['v-text'] : '' }}
+            </component>
+          </slot>
+        </slot>
+
+        <!-- slot at bottom of item -> <div slot="slot-bottom-key-[deep-nested-key-name]> -->
+        <slot :name="`slot-bottom-type-${getType(obj)}`" />
+        <slot :name="`slot-bottom-key-${getKeyAsClass(obj)}`" />
+      </v-col>
+
+      <!-- push next item to the right and fill space between items -->
+      <v-spacer v-if="obj.schema.spacer" />
+    </template>
+  </v-row>
+</template>
+
+<script>
+// Inspired by: https://github.com/wotamann/vuetify-form-base
+
+import { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VTextarea, VSelect } from 'vuetify/components';
+import { VTimePicker, VDateInput } from 'vuetify/labs/components';
+
+import { validate as veeValidate, normalizeRules } from 'vee-validate';
+
+//import { useDate } from 'vuetify';
+
+// Lodash similar helper functions
+const getByDot = (obj, path, defaultValue = null) => path.split('.').reduce((acc, key) => acc?.[key], obj) ?? defaultValue;
+const isString = (value) => typeof value === 'string' || (typeof value === 'object' && value !== null && Object.prototype.toString.call(value) === '[object String]');
+const isFunction = (value) => typeof value === 'function';
+const isPlainObject = value => {
+  if (Object.prototype.toString.call(value) !== '[object Object]') return false;
+
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === null || prototype === Object.prototype;
+};
+const isEmpty = value => {
+  if (value == null) return true; // null or undefined
+  if (typeof value === 'string' || Array.isArray(value)) return value.length === 0;
+  if (value instanceof Map || value instanceof Set) return value.size === 0;
+  if (typeof value === 'object') return Object.keys(value).length === 0;
+  return false;
+};
+
+export const validate = async ($event, onSuccessCallback) => {
+  if(!($event instanceof SubmitEvent)) {
+    throw new Error('Validation failed due to the passed $event is not a SubmitEvent event, the correct usage is: @submit="validate($event, onSuccessCallback)"');
+  }
+  if($event.defaultPrevented === false) {
+    $event.preventDefault();
+  }
+  const { valid, errors } = await $event; // Vuetify form SubmitEventPromise event
+  if(valid) {
+    onSuccessCallback();
+  } else {
+    const e = new Error('Form validation failed');
+    e.errors = errors;
+    console.warn(e, errors);
+  }
+};
+
+export function rulesToVuetify(rules, objSchema = {}, formData = {}) {
+  if(typeof rules === 'undefined') return [];
+  if(typeof rules !== 'string' && !Array.isArray(rules) && typeof rules !== 'function') return rules;
+
+  rules = Array.isArray(rules) ? rules : [rules];
+
+  const vuetifyRules = rules.map(rule => {
+    if (typeof rule === 'string') {
+      //rule = normalizeRules(rule); // Done by vee-validate for now
+      return value => {
+        const passes = veeValidate(value, rule, {
+          name: objSchema.name,
+          label: objSchema.label ?? objSchema.name,
+          values: formData,
+        });
+        return passes.then(value => {
+          //console.log('Passes:', value);
+          if(value.valid === true) return true;
+          return value.errors[0];
+        });
+      }
+    }
+    return rule;
+  });
+  //console.log('rulesToVuetify', rules, vuetifyRules, objSchema);
+  return vuetifyRules;
+}
+
+const typeToComponent = {
+  // Use native HTML5 Input Types - https://www.wufoo.com/html5/
+  text: 'v-text-field',
+  password: 'v-text-field',
+  email: 'v-text-field',
+  tel: 'v-text-field',
+  url: 'v-text-field',
+  search: 'v-text-field',
+  number: 'v-text-field',
+
+  // Map schema.type to vuetify-control (vuetify 2.0)
+  range: 'v-slider',
+  file: 'v-file-input',
+  switch: 'v-switch',
+  checkbox: 'v-checkbox',
+  color: 'v-color-picker',
+  date: 'v-date-input',
+  time: 'v-time-picker',
+  textarea: 'v-textarea',
+  select: 'v-select',
+};
+
+export default {
+  name: 'VFormJson',
+  /*
+  setup() {
+    const date = useDate();
+    return { date };
+  },
+  */
+  components: { VTextField, VSlider, VSwitch, VCheckbox, VColorPicker, VDateInput, VTimePicker, VTextarea, VSelect },
+  props: {
+    value: {
+      type: Object,
+      required: true
+    },
+    schema: {
+      type: Object,
+      required: true
+    }
+  },
+  emits: ['change', 'update', 'update:modelValue'],
+  data() {
+    return {
+      flatCombinedArray: [],
+      isMenuOpen: false,
+    }
+  },
+  computed: {
+    storeStateData() {
+      this.updateArrayFromState(this.schema, this.value); // Revisit this one, not very optimal...
+      return this.value;
+    },
+    storeStateSchema() {
+      this.updateArrayFromState(this.schema, this.value); // Revisit this one, not very optimal...
+      return this.schema;
+    }
+  },
+  created() {
+    this.flatCombinedArray = this.flattenAndCombineToArray(this.value, this.schema);
+  },
+  methods: {
+    rulesToVuetify,
+    mapTypeToComponent(type) {
+      return typeToComponent[type] ? typeToComponent[type] : `${type}`
+    },
+    getType(obj) {
+      return obj.schema.type;
+    },
+    getKeyAsClass(obj) {
+      return obj.key.replace(/\./g, '-');
+    },
+    // Handle cols, order, offset for the <v-col> element
+    getColBind(obj) {
+      const keysToColAttributes = (key, prefix) => {
+        if (typeof key === 'undefined') return;
+        if (isPlainObject(key)) {
+          return Object.assign(...Object.entries(key).map(([k, v]) => ({[prefix + k]: v})));
+        }
+        return {[prefix === '' ? 'cols' : prefix.slice(0, -1)]: key};
+      };
+      return {
+        ...keysToColAttributes(obj.schema.cols, '') || {cols: 12},
+        ...keysToColAttributes(obj.schema.offset, 'offset-'),
+        ...keysToColAttributes(obj.schema.order, 'order-')
+      };
+    },
+    getInputOn(obj) {
+      const on = typeof obj['v-on'] !== 'undefined' ? obj['v-on'] : {};
+      Object.keys(obj).forEach((key) => {
+        if (key.indexOf('v-on:') === 0) {
+          on[key.replace('v-on:', '')] = obj[key];
+        }
+      });
+      return on;
+    },
+    getPropertyClassName(obj) {
+      // get PROP specific name by app-/prepending 'appendix-' and replacing '.' with '-' in nested key path  -> 'controls switch'
+      return obj.key ? obj.key.split('.').map(s => `prop-${s}`).join(' ') : ''
+    },
+    getClassName(obj) {
+      // Combine all classes, example: class -> 'item type-checkbox key-address-zip prop-adress prop-zip'
+      return `py-0 item type-${this.getType(obj)} key-${this.getKeyAsClass(obj)} ${this.getPropertyClassName(obj)}`;
+    },
+    // Map Values coming FROM Control or going TO Control
+    toCtrl(params) {
+      // manipulate value going to control, toCtrl-function must return a (modified) value
+      // schema:{ name: { type:'text', toCtrl: ( {value} ) value && value.toUpperCase, ... }, ... }
+      return isFunction(params.obj.schema.toCtrl) ? params.obj.schema.toCtrl(params) : params.value
+    },
+    fromCtrl(params) {
+      // manipulate updated value from control, fromCtrl-function must return a (modified) value
+      // schema:{ name: { type:'text', fromCtrl: ( {value} ) value && value.toUpperCase, ... }, ... }
+      return isFunction(params.obj.schema.fromCtrl) ? params.obj.schema.fromCtrl(params) : params.value
+    },
+    // Radio options, sanitize item from array schema.options, ensure that the values are objects
+    sanitizeRadioOption(v) {
+      return isString(v) ? {value: v, label: v} : v;
+    },
+    setValue(obj) {
+      // Control gets a Value
+      let value = this.toCtrl({value: obj.value, obj, data: this.storeStateData, schema: this.storeStateSchema})
+
+      // Special handling for some Vuetify components
+      if(this.mapTypeToComponent(obj.schema.type) === 'v-date-input') {
+        // v-date-input does not accept null, only undefined
+        if(value === null) {
+          value = undefined;
+        } else if(isString(value)) {
+          value = this.$vuetify.date.parseISO(value);
+        }
+      }
+
+      return value;
+    },
+    onColor(value, obj) {
+      this.onInput(value, obj);
+    },
+    onDate(value, obj) {
+      if(value !== null) {
+        value = this.$vuetify.date.toISO(value);
+      }
+      this.onInput(value, obj);
+    },
+    // Get Value from Input & other Events
+    onInput(value, obj) {
+      // Value after change in Control
+      value = this.fromCtrl({value, obj, data: this.storeStateData, schema: this.storeStateSchema});
+
+      // harmonize all empty strings to null, because clearable resets to null and not to empty string !!!
+      value = value === '' ? null : value;
+
+      // update deep nested prop(key) with value
+      this.setObjectByPath(this.storeStateData, obj.key, value);
+      this.updateArrayFromState(this.schema, this.value);
+
+      // emit events
+      this.emitValue('update:modelValue', value);
+    },
+    // Event base
+    emitValue(emit, val) {
+      this.$emit(emit, val); // listen to specific event
+      if ('inputclick'.indexOf(emit) > -1) this.$emit('change', val); // listen only to changes
+      this.$emit('update', val); // all listen to events
+    },
+
+    // Update the value based on the dot-path
+    setObjectByPath(object, path, value) {
+      // resolves chained keys (like 'user.address.street') on an object and set the value
+      const pathArray = path.split('.');
+      let schema = this.schema;
+      pathArray.forEach((p, ix) => {
+        schema = schema[p];
+        if (ix === pathArray.length - 1) {
+          object[p] = value; // Vue 3
+          //this.$set(object, p, value); // Vue 2
+        } else if (typeof object[p] === 'undefined') {
+          object[p] = Array.isArray(schema) ? [] : {}; // Vue 3
+          //this.$set(object, p, Array.isArray(schema) ? [] : {}); // Vue 2
+        }
+        object = object[p];
+      });
+    },
+    updateArrayFromState(schema, data) {
+      this.flatCombinedArray.forEach(obj => {
+        obj.schema = getByDot(schema, obj.key, null);
+        obj.value = getByDot(data, obj.key, null);
+      });
+    },
+    // Flatten the schema
+    flattenSchemaWithData(sch, dat) {
+      const data = {};
+      const schema = {};
+      Object.keys(sch).forEach(i => {
+        // If the 'type' property was found and is a string, we have an actual input field here, no nesting here.
+        if (isString(sch[i].type)) {
+          console.debug(`Schema '${i}' input found`);
+          data[i] = dat[i];
+          schema[i] = sch[i];
+        }
+        // Check if the item is an object (nested) OR an array (nested)
+        else if ((isPlainObject(sch[i]) && !isEmpty(sch[i])) || Array.isArray(sch[i])) {
+          console.debug(`Schema '${i}' nested input found`);
+          let {data: flatData, schema: flatSchema} = this.flattenSchemaWithData(sch[i], dat[i] || {});
+          Object.keys(flatData).forEach(ii => {
+            data[i + '.' + ii] = flatData[ii];
+            schema[i + '.' + ii] = flatSchema[ii];
+          });
+        }
+      });
+      return {schema, data};
+    },
+    combineObjectsToArray({schema, data}) {
+      const arr = [];
+      Object.keys(data).forEach(key => {
+        if (!isPlainObject(schema[key])) {
+          console.warn(`Prop '${key}' must have a correspondingly Property in Schema with at least ${key}:{ type:'text'} as value. Prop '${key}' is not editable and keeps untouched!`);
+          return;
+        }
+        arr.push({key, value: data[key], schema: schema[key]});
+      });
+      return arr;
+    },
+    flattenAndCombineToArray(data, schema) {
+      const flattenedObjects = this.flattenSchemaWithData(schema, data);
+      return this.combineObjectsToArray(flattenedObjects);
+    },
+  }
+}
+</script>

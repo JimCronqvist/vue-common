@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { useLocaleStore } from '../../stores/locale';
 
 const locales = {
   en: () => import('dayjs/locale/en'),
@@ -12,3 +13,11 @@ export const dayjsUpdateLocale = (language) => {
     dayjs.locale(language);
   });
 };
+
+export function boot(app, { $pinia }) {
+  const localeStore = useLocaleStore($pinia);
+  localeStore.registerChangeLocaleCallback(true, (locale, language) => dayjsUpdateLocale(language));
+  app.config.globalProperties.$dayjs = dayjs;
+}
+
+export default dayjs;

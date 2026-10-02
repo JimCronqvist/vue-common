@@ -1,44 +1,34 @@
-const getDefaultState = () => {
-    return {
-        visibility: false,
-        message: "An error has occurred",
-        color: "error",
-        timeout: 6000,
-        x: null,
-        y: "bottom"
-    };
-};
+import { defineStore } from 'pinia';
 
-let state = getDefaultState();
+export const useSnackbarStore = defineStore('snackbar', {
+  state: () => ({
+    visibility: false,
+    message: "An error has occurred",
+    color: "error",
+    timeout: 6000,
+    x: null,
+    y: "bottom",
+    closable: true,
+  }),
 
-const mutations = {
-    setVisibility: (state, visibility) => {
-        state.visibility = visibility;
+  actions: {
+    setVisibility(visibility) {
+      this.visibility = visibility;
     },
-    updateSettings(state, settings) {
-        Object.assign(state, settings);
-    }
-};
 
-const actions = {
+    _updateSettings(settings) {
+      Object.assign(this.$state, settings);
+    },
+
     /**
-     * Set the message and type an show the snackbar
-     * @param commit
+     * Set the message and type and show the snackbar
      * @param payload
      */
-    showMessage({ commit }, payload) {
-        commit("setVisibility", false);
-        commit("updateSettings", Object.assign(getDefaultState(), payload));
-        commit("setVisibility", true);
+    showMessage(payload) {
+      this.setVisibility(false);
+      this.$reset(); // Reset to default state
+      this._updateSettings(payload); // Apply new settings from payload
+      this.setVisibility(true);
     }
-};
-
-const getters = {};
-
-export default {
-    state,
-    mutations,
-    actions,
-    getters,
-    namespaced: true
-};
+  }
+});

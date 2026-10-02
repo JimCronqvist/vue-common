@@ -1,21 +1,16 @@
-import app from 'vue';
-import store from '@/store';
-import router from '@/router';
 
-export default async function boot(imports) {
+export default async function boot(app, imports) {
   if(!Array.isArray(imports)) {
     console.warn('Boot scripts needs to be provided as an array of imports');
     return null;
   }
-  const vueOptions = {};
   for(const imp of imports) {
     const script = imp instanceof Function ? { boot: await imp } : await imp;
     let triggered = false;
     for(const key of ['boot', 'default']) {
       if(script[key] instanceof Function) {
-        const option = await script[key]({ app, store, router });
-        //console.log(script, key, option);
-        Object.assign(vueOptions, option);
+        await script[key](app, app.config.globalProperties);
+        //console.log(script, key);
         triggered = true;
       }
     }
@@ -23,18 +18,20 @@ export default async function boot(imports) {
       console.warn('The boot script does not have a default exported function', script);
     }
   }
-  return vueOptions;
 }
 
 // Code splitting is not possible to disable per dynamic import in vite/rollup.
 // Recommended to not use dynamic imports for now, and instead do normal static imports and pass in the function
 export const bootList = () => [
-  //import('./axiosAuth'),
-  //import('./axiosHttp'),
+  //import('./axiosHttp'),            // Keep this as the first one, all others will use the same axios instance
+  //import('./pinia'),                // Keep this as the second one, will inject axios as well to .$http
+  //import('./axiosAuth'),            // Auth should come before the error handler
+  //import('./axiosTenant'),
   //import('./axiosLoadingHandler'),
   //import('./axiosErrorHandler'),
   //import('./i18n'),
   //import('./dayjs'),
-  //import('./vuetify2'),
   //import('./filters'),
+  //import('./vee-validate'),
+  //import('@/plugins/vuetify'),
 ];
