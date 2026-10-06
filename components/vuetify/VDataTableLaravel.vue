@@ -31,7 +31,7 @@
     },
     data() {
       return {
-        page: 1,
+        page: this.modelValue,
         defaultDataTableAttributes: {
           loading: "true",
           hover: true,
@@ -67,6 +67,9 @@
       }
     },
     watch: {
+      modelValue(value) {
+        this.page = value;
+      },
       page() {
         this.$emit('update:modelValue', this.page);
       }
